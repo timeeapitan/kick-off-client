@@ -1,0 +1,267 @@
+import SearchIcon from "@mui/icons-material/Search";
+import {
+  Autocomplete,
+  Box,
+  Container,
+  IconButton,
+  InputAdornment,
+  TextField,
+} from "@mui/material";
+import { DataGrid } from "@mui/x-data-grid";
+import axios from "axios";
+import moment from "moment";
+import React, { useEffect, useState } from "react";
+import MainLayout from "../components/MainLayout";
+import Button from "@mui/material/Button";
+import DeleteIcon from "@mui/icons-material/Delete";
+import { makeStyles } from "@mui/styles";
+import { useHistory } from "react-router-dom";
+
+const useStyles = makeStyles({
+  box: {
+    display: "flex",
+    alignItems: "flex-end",
+    justifyContent: "flex-end",
+  },
+});
+
+const FriendsPage = () => {
+  const classes = useStyles();
+
+  const token = sessionStorage.getItem("token");
+  const username = sessionStorage.getItem("username");
+
+  const [friends, setFriends] = useState([]);
+  const [id, setId] = useState("");
+  const [users, setUsers] = useState([]);
+  const [open, setOpen] = useState(false);
+  const [rows, setRows] = useState([]);
+  const [selectedIds, setSelectedIds] = useState([]);
+  const [friend, setFriend] = useState("");
+  const [refresh, setRefresh] = useState(false);
+  const history = useHistory();
+
+  useEffect(() => {
+    getUserId();
+    getAllUsers();
+  }, []);
+
+  useEffect(() => {
+    let ignore = false;
+
+    if (!ignore) {
+      getFriends();
+    }
+
+    return () => {
+      ignore = true;
+    };
+  }, [id, refresh]);
+
+  useEffect(() => {
+    let ignore = false;
+
+    if (!ignore) {
+      populateRows(friends);
+    }
+
+    return () => {
+      ignore = true;
+    };
+  }, [friends]);
+
+  const getUserId = () => {
+    return axios
+      .get(
+        "http://localhost:8080/user/getUserByUsername?username=" + username,
+        {
+          headers: {
+            Authorization: token,
+          },
+        }
+      )
+      .then((response) => {
+        setId(response.data.id);
+      });
+  };
+
+  const getFriends = async () => {
+    return axios
+      .get("http://localhost:8080/friendship/listFriends/?id=" + id, {
+        headers: {
+          Authorization: token,
+        },
+      })
+      .then((response) => {
+        const friends = response.data;
+        setFriends(friends);
+      });
+  };
+
+  const getCreatedDate = async (firstUserId, secondUserId) => {
+    return axios
+      .get(
+        "http://localhost:8080/friendship/getDate?firstUserId=" +
+          firstUserId +
+          "&secondUserId=" +
+          secondUserId,
+        {
+          headers: {
+            Authorization: token,
+          },
+        }
+      )
+      .then((response) => {
+        const date = response.data;
+        return date;
+      });
+  };
+
+  const getAllUsers = () => {
+    return axios
+      .get("http://localhost:8080/user/getAll", {
+        headers: {
+          Authorization: token,
+        },
+      })
+      .then((response) => {
+        setUsers(response.data);
+      });
+  };
+
+  const deleteFriendship = async (secondId) => {
+    await axios
+      .delete(
+        "http://localhost:8080/friendship/deleteFriendship?firstUserId=" +
+          id +
+          "&secondUserId=" +
+          secondId,
+        {
+          headers: {
+            Authorization: token,
+          },
+        }
+      )
+      .then((response) => {
+        setRefresh(!refresh);
+      })
+      .catch((err) => {
+        throw new Error(err);
+      });
+  };
+
+  const deleteFriends = () => {
+    selectedIds.map((friendId) => {
+      deleteFriendship(friendId);
+    });
+  };
+
+  const handleSearchFriend = (friend) => {
+    let [firstName, lastName] = friend.split(" ");
+    console.log(users);
+    for (let i = 0; i < users.length; i++) {
+      if (users[i].firstName === firstName && users[i].lastName === lastName) {
+        console.log("they are alike");
+        history.push("/friend-profile/" + users[i].id);
+      }
+    }
+  };
+
+  async function populateRows(friends) {
+    var rows = [];
+    for (const friend of friends) {
+      const date = await getCreatedDate(id, friend.id);
+
+      let array = {
+        id: friend.id,
+        firstName: friend.firstName,
+        lastName: friend.lastName,
+        username: friend.username,
+        createdDate: moment(date).format("MMMM Do YYYY"),
+      };
+      rows.push(array);
+    }
+
+    setRows(rows);
+  }
+
+  const columns = [
+    // { field: "id", headerName: "id" },
+    { field: "firstName", headerName: "First name", width: 130 },
+    { field: "lastName", headerName: "Last name", width: 130 },
+    { field: "username", headerName: "Username", width: 130 },
+    { field: "createdDate", headerName: "Friends since", width: 150 },
+  ];
+
+  return (
+    <>
+      <MainLayout>
+        <Container>
+          <Autocomplete
+            style={{ marginTop: 20 }}
+            freeSolo
+            disableClearable
+            open={open}
+            onInputChange={(_, value) => {
+              if (value.length === 0) {
+                if (open) setOpen(false);
+              } else {
+                if (!open) setOpen(true);
+              }
+              setFriend(value);
+              console.log(value);
+            }}
+            onClose={() => setOpen(false)}
+            options={users.map(
+              (option) => option.firstName + " " + option.lastName
+            )}
+            renderInput={(params) => (
+              <TextField
+                key={params.id}
+                {...params}
+                label="Search friends"
+                InputProps={{
+                  ...params.InputProps,
+                  type: "search",
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton onClick={() => handleSearchFriend(friend)}>
+                        <SearchIcon />
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            )}
+          />
+        </Container>
+
+        <Container>
+          <div style={{ height: 400, width: "100%" }}>
+            <DataGrid
+              rows={rows}
+              columns={columns}
+              pageSize={5}
+              rowsPerPageOptions={[5]}
+              checkboxSelection
+              hideFooterPagination
+              onSelectionModelChange={(ids) => {
+                setSelectedIds(ids);
+              }}
+            />
+          </div>
+          <Box m={3} className={classes.box}>
+            <Button
+              startIcon={<DeleteIcon />}
+              color="error"
+              onClick={deleteFriends}>
+              Delete friends
+            </Button>
+          </Box>
+        </Container>
+      </MainLayout>
+    </>
+  );
+};
+
+export default FriendsPage;
