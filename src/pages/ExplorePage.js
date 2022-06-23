@@ -6,6 +6,8 @@ import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import MainLayout from "../components/MainLayout";
 import Match from "../components/Match";
+import Link from "@mui/material/Link";
+import Typography from "@mui/material/Typography";
 
 const useStyles = makeStyles({
   container: {
@@ -159,7 +161,11 @@ const ExplorePage = () => {
   } else {
     return (
       <MainLayout>
-        <h3>No matches yet</h3>
+        <Typography display="flex" justifyContent="center">
+          <Link href="/login" color="blue" underline="none">
+            To view the available matches, please log in the application!
+          </Link>
+        </Typography>
       </MainLayout>
     );
   }
