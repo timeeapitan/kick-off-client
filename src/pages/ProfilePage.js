@@ -479,7 +479,10 @@ const ProfilePage = () => {
           justifyContent="center">
           <Grid item xs={12}>
             {uploadImage && (
-              <Avatar src={fakePictureSrc} sx={{ width: 170, height: 170 }} />
+              <Avatar
+                src={currentUser.tablePictureSrc}
+                sx={{ width: 170, height: 170 }}
+              />
             )}
             {!uploadImage && (
               <Avatar

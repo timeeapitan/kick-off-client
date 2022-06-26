@@ -6,6 +6,9 @@ import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import MainLayout from "../components/MainLayout";
 import Match from "../components/Match";
+import Link from "@mui/material/Link";
+import Typography from "@mui/material/Typography";
+import AuthenticationService from "../service/AuthenticationService.js";
 
 const useStyles = makeStyles({
   buttonContainer: {
@@ -27,6 +30,7 @@ const MatchesPage = () => {
   const [matches, getMatches] = useState("");
   const [refreshMatches, setRefreshMatches] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
+  const booleanIsUserLoggedIn = AuthenticationService.isUserLoggedIn();
 
   const { isLoaded } = useJsApiLoader({
     id: "google-map-script",
@@ -109,7 +113,7 @@ const MatchesPage = () => {
       });
   };
 
-  if (matches.length > 0) {
+  if (booleanIsUserLoggedIn === true) {
     return (
       <MainLayout>
         <Grid container className={classes.buttonContainer}>
@@ -120,42 +124,50 @@ const MatchesPage = () => {
             Schedule a new match
           </Button>
         </Grid>
-
-        <Grid
-          container
-          spacing={{ xs: 2, md: 3 }}
-          columns={{ xs: 1, xm: 2, md: 3 }}
-          className={classes.container}>
-          {matches.map((match) => (
-            <Match
-              key={match.id}
-              title={match.matchTitle}
-              date={match.date}
-              locationLat={match.locationLat}
-              locationLng={match.locationLng}
-              noOfTeams={match.noOfTeams}
-              noOfPlayersPerTeam={match.noOfPlayersPerTeam}
-              cost={match.cost}
-              startTime={match.startTime}
-              duration={match.duration}
-              isLoaded={isLoaded}
-              soloPlayersMode={match.soloPlayersMode}
-              matchId={match.id}
-              availableSpots={match.availableSpots}
-              handleOnDeleteClick={() => {
-                handleOnDeleteClick(match.id);
-              }}
-              height={100}
-              isExplorePage={false}
-            />
-          ))}
-        </Grid>
+        {matches.length > 0 && (
+          <Grid
+            container
+            spacing={{ xs: 2, md: 3 }}
+            columns={{ xs: 1, xm: 2, md: 3 }}
+            className={classes.container}>
+            {matches.map((match) => (
+              <Match
+                key={match.id}
+                title={match.matchTitle}
+                date={match.date}
+                locationLat={match.locationLat}
+                locationLng={match.locationLng}
+                noOfTeams={match.noOfTeams}
+                noOfPlayersPerTeam={match.noOfPlayersPerTeam}
+                cost={match.cost}
+                startTime={match.startTime}
+                duration={match.duration}
+                isLoaded={isLoaded}
+                soloPlayersMode={match.soloPlayersMode}
+                matchId={match.id}
+                availableSpots={match.availableSpots}
+                handleOnDeleteClick={() => {
+                  handleOnDeleteClick(match.id);
+                }}
+                height={100}
+                isExplorePage={false}
+              />
+            ))}
+          </Grid>
+        )}
       </MainLayout>
     );
   } else {
     return (
       <MainLayout>
         <Grid container className={classes.buttonContainer}>
+          <Typography display="flex" justifyContent="center">
+            <Link href="/login" color="blue" underline="none">
+              To schedule your own matches, please log in or create an account!
+            </Link>
+          </Typography>
+        </Grid>
+        <Grid container className={classes.buttonContainer}>
           <Button
             variant="contained"
             style={{ color: "white" }}
@@ -163,7 +175,6 @@ const MatchesPage = () => {
             Schedule a new match
           </Button>
         </Grid>
-        <h3>No matches yet</h3>
       </MainLayout>
     );
   }

@@ -41,7 +41,7 @@ const HomePage = () => {
 
   return (
     <MainLayout>
-      <Container style={{ ma: { xs: 10 } }}>
+      <Container style={{ padding: 50 }} disableGutters>
         <Grid
           container
           columnSpacing={3}
@@ -60,12 +60,12 @@ const HomePage = () => {
                 variant="h5"
                 align="justify"
                 className={classes.italic}>
-                You cannot play football alone!
+                You cannot play soccer alone!
               </Typography>
               <br></br>
               <Typography variant="h6" align="justify">
                 Kick-off is a platform that gives you the simplest way of
-                meeting football amateurs and of organizing matches in 2 strokes
+                meeting soccer amateurs and of organizing matches in 2 strokes
                 and 3 moves.
               </Typography>
               <br></br>
@@ -74,8 +74,8 @@ const HomePage = () => {
               </Typography>
               <Typography variant="h6" align="justify">
                 To take the motives out of the vocabulary and people out of the
-                house. It has never been easier to form teams and organize
-                football matches wherever you are.
+                house. It has never been easier to create teams and organize
+                soccer matches wherever you are.
               </Typography>
               <br></br>
             </Grid>
@@ -98,16 +98,16 @@ const HomePage = () => {
             columnSpacing={12}>
             <Grid item xs={12} md={6} lg={6} className={classes.item}>
               <Typography variant="h6" align="justify">
-                We encourage people to invite their friends and play football
+                We encourage people to invite their friends and play soccer
                 together. Anytime, a player can also become a manager once he
-                creates a team or organizes a football match.
+                creates a team or organizes a soccer match.
               </Typography>
             </Grid>
             <Grid item xs={12} md={6} lg={6} className={classes.item}>
               <Typography variant="h6" align="justify">
                 Kick-off is not just for players. Team managers will be able to
                 manage their matches and players more efficiently using the data
-                an tools provided by the app.
+                and tools provided by the app.
               </Typography>
             </Grid>
           </Grid>
@@ -118,7 +118,7 @@ const HomePage = () => {
             columnSpacing={12}>
             <Grid
               item
-              xs={6}
+              xs={12}
               md={6}
               lg={6}
               className={classes.item}
@@ -136,7 +136,7 @@ const HomePage = () => {
                 src={football_player}
               />
             </Grid>
-            <Grid item xs={6} md={6} lg={6} className={classes.item}>
+            <Grid item xs={12} md={6} lg={6} className={classes.item}>
               <Typography
                 variant="h4"
                 align="justify"
@@ -180,20 +180,28 @@ const HomePage = () => {
             justifyContent="space-around"
             className={classes.container}
             columnSpacing={12}>
-            <Grid item xs={6} md={6} lg={6} className={classes.item}>
+            <Grid item xs={12} md={6} lg={6} className={classes.item}>
               <Typography
                 variant="h4"
                 align="justify"
                 style={{ marginBottom: "5px" }}>
                 Manager
               </Typography>
-              <Typography variant="h6" align="justify">
+              <Typography
+                variant="h6"
+                align="justify"
+                display="flex"
+                alignItems="flex-start">
                 <SportsTwoToneIcon
                   style={{ marginRight: "5px", fill: "#179fa3" }}
                 />
                 Find a sport field and organize a match at a given date.
               </Typography>
-              <Typography variant="h6" align="justify">
+              <Typography
+                variant="h6"
+                align="justify"
+                display="flex"
+                alignItems="flex-start">
                 <SportsTwoToneIcon
                   style={{ marginRight: "5px", fill: "#179fa3" }}
                 />
@@ -213,7 +221,7 @@ const HomePage = () => {
             </Grid>
             <Grid
               item
-              xs={6}
+              xs={12}
               md={6}
               lg={6}
               className={classes.item}
@@ -251,22 +259,20 @@ const HomePage = () => {
             className={classes.container}
             columnSpacing={10}>
             <Grid item xs={12} md={12} lg={2} className={classes.item}>
-              <Typography variant="h6" align="center">
+              <Typography variant="h6" align="center" alignItems="flex-start">
                 <CheckBoxTwoToneIcon
                   style={{ marginRight: "5px", fill: "#179fa3" }}
                 />
                 the area where the user wants to play football
               </Typography>
             </Grid>
-            <Grid item xs={12} md={12} lg={2} className={classes.item}>
-              <Typography variant="h6" align="center">
-                <CheckBoxTwoToneIcon
-                  style={{ marginRight: "5px", fill: "#179fa3" }}
-                />
-                weekly availability
-              </Typography>
-            </Grid>
-            <Grid item xs={12} md={12} lg={2} className={classes.item}>
+            <Grid
+              item
+              xs={12}
+              md={12}
+              lg={2}
+              className={classes.item}
+              alignItems="flex-start">
               <Typography variant="h6" align="center">
                 <CheckBoxTwoToneIcon
                   style={{ marginRight: "5px", fill: "#179fa3" }}
@@ -274,7 +280,13 @@ const HomePage = () => {
                 favorite position
               </Typography>
             </Grid>
-            <Grid item xs={12} md={12} lg={2} className={classes.item}>
+            <Grid
+              item
+              xs={12}
+              md={12}
+              lg={2}
+              className={classes.item}
+              alignItems="flex-start">
               <Typography variant="h6" align="center">
                 <CheckBoxTwoToneIcon
                   style={{ marginRight: "5px", fill: "#179fa3" }}
@@ -282,7 +294,13 @@ const HomePage = () => {
                 favorite leg
               </Typography>
             </Grid>
-            <Grid item xs={12} md={12} lg={2} className={classes.item}>
+            <Grid
+              item
+              xs={12}
+              md={12}
+              lg={2}
+              className={classes.item}
+              alignItems="flex-start">
               <Typography variant="h6" align="center">
                 <CheckBoxTwoToneIcon
                   style={{ marginRight: "5px", fill: "#179fa3" }}

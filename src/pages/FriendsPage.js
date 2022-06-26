@@ -99,7 +99,7 @@ const FriendsPage = () => {
   };
 
   const getCreatedDate = async (firstUserId, secondUserId) => {
-    return axios
+    await axios
       .get(
         "http://localhost:8080/friendship/getDate?firstUserId=" +
           firstUserId +

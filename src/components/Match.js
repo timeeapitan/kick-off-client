@@ -163,7 +163,7 @@ const Match = (props) => {
 
   useEffect(() => {
     getAllPlayers();
-  }, [props.matchId]);
+  }, [props.matchId, refresh]);
 
   const getUser = async () => {
     await axios
@@ -198,7 +198,7 @@ const Match = (props) => {
       .then((response) => {
         setPlayers(response.data);
         console.log("PLAYERS");
-        console.log(players);
+        console.log(response.data);
       })
       .catch((error) => {
         throw new Error(error);
@@ -379,11 +379,13 @@ const Match = (props) => {
         <Box display="flex" justifyContent="center">
           {props.isExplorePage && (
             <Button
-              disabled={players.some(
-                (player) => player[2] == currentUser.username
-              )}
+              disabled={players.some((player) => {
+                return (
+                  player[2] == currentUser.username || props.availableSpots == 0
+                );
+              })}
               onClick={() => {
-                props.handleAddPlayerToMatch(props.id);
+                props.handleAddPlayerToMatch();
                 setRefresh(!refresh);
               }}>
               I want to participate

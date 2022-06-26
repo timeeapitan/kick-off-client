@@ -64,21 +64,15 @@ export class MapContainer extends Component {
           }) => (
             <div>
               <TextField
+                fullWidth
                 variant="outlined"
                 size="small"
-                fullWidth
                 style={{ marginBottom: "20px" }}
                 {...getInputProps({
                   placeholder: "Search Places",
                   className: "location-search-input",
                 })}
               />
-              {/* <input
-                {...getInputProps({
-                  placeholder: "Search Places ...",
-                  className: "location-search-input",
-                })}
-              /> */}
               <div
                 fullWidth
                 className="autocomplete-dropdown-container"
@@ -109,7 +103,7 @@ export class MapContainer extends Component {
 
         <Map
           options={this.state.options}
-          containerStyle={{ width: "35vw", height: "45vh" }}
+          containerStyle={{ width: "85%", height: "65%" }}
           google={this.props.google}
           initialCenter={{
             lat: this.state.mapCenter.lat,

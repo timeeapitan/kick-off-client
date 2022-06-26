@@ -53,8 +53,6 @@ const useStyles = makeStyles({
   dialogPaper: {
     minHeight: "70vh",
     maxHeight: "70vh",
-    minWidth: "80vh",
-    maxWidth: "80vh",
   },
   containerStyle: { height: 150 },
 });
@@ -269,7 +267,7 @@ const MatchForm = () => {
           </Typography>
           <LocalizationProvider dateAdapter={AdapterDateFns}>
             <Grid container>
-              <Grid style={{ marginRight: 20 }}>
+              <Grid style={{ marginRight: 20, marginBottom: 10 }}>
                 <DatePicker
                   openTo="day"
                   views={["year", "month", "day"]}
@@ -285,7 +283,7 @@ const MatchForm = () => {
                   className={classes.field}
                 />
               </Grid>
-              <Grid>
+              <Grid style={{ marginRight: 20, marginBottom: 10 }}>
                 <TimePicker
                   value={finalStartTime}
                   onChange={(newTime) => {
@@ -401,8 +399,6 @@ const MatchForm = () => {
             <DialogContent>
               <Box
                 sx={{
-                  display: "flex",
-                  flexDirection: "column",
                   padding: "15px",
                 }}
                 fullWidth>

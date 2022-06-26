@@ -203,7 +203,9 @@ const MyAppBar = () => {
               </IconButton>
               <Tooltip title="Open settings">
                 <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                  {hasProfilePicture && <Avatar src={fakePictureSrc} />}
+                  {hasProfilePicture && (
+                    <Avatar src={currentUser.tablePictureSrc} />
+                  )}
                   {!hasProfilePicture && <Avatar {...stringAvatar(fullName)} />}
                 </IconButton>
               </Tooltip>

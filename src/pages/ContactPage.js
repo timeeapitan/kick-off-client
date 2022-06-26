@@ -4,6 +4,8 @@ import {
   Button,
   Card,
   CardContent,
+  createTheme,
+  CssBaseline,
   Grid,
   TextField,
   Typography,
@@ -63,28 +65,42 @@ const ContactPage = () => {
 
   return (
     <MainLayout>
-      <Grid container spacing={5} columns={16} style={{ padding: 100 }}>
-        <Grid item xs={8}>
-          <h1>Contact us</h1>
-          <br />
-          <p>
+      <Grid container spacing={5} style={{ padding: 50, marginBottom: 100 }}>
+        <Grid item xs={12} md={12} lg={6}>
+          <Typography variant="h3" style={{ marginBottom: 30 }}>
+            Contact us
+          </Typography>
+          <Typography style={{ marginBottom: 30 }}>
             Need to get in touch with us? Either fill out the form with your
             inquiry or give us a call following the information listed below.
-          </p>
-          <br />
-          <br />
-          <br />
-          <p>
-            <CallIcon /> 0753 905 177
-          </p>
-          <p>
-            <HomeRounded /> Petőfi Sándor Street 13, Cluj-Napoca 4006103
-          </p>
-          <p>
-            <EmailRounded /> business@info.com
-          </p>
+          </Typography>
+          <Typography
+            style={{
+              display: "flex",
+              alignItems: "center",
+              marginBottom: "10px",
+            }}>
+            <CallIcon style={{ marginRight: 10 }} /> 0753 905 177
+          </Typography>
+          <Typography
+            style={{
+              display: "flex",
+              alignItems: "center",
+              marginBottom: "10px",
+            }}>
+            <HomeRounded style={{ marginRight: 10 }} /> Petőfi Sándor Street 13,
+            Cluj-Napoca 4006103
+          </Typography>
+          <Typography
+            style={{
+              display: "flex",
+              alignItems: "center",
+              marginBottom: "10px",
+            }}>
+            <EmailRounded style={{ marginRight: 10 }} /> kickoffapp@info.com
+          </Typography>
         </Grid>
-        <Grid item xs={8}>
+        <Grid item xs={12} md={12} lg={6}>
           <Card style={{ maxWidth: 700, justifyContent: "center" }}>
             <CardContent style={{ backgroundColor: "#c3bcf7de" }}>
               <Typography gutterBottom variant="h5">

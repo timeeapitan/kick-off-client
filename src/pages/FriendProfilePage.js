@@ -252,7 +252,7 @@ const FriendProfilePage = (props) => {
           <Grid item xs={12}>
             <Box display="flex" justifyContent="center">
               <Avatar
-                src={friendProfilePicture}
+                src={friendUser.tablePictureSrc}
                 alt="Profile picture"
                 sx={{ width: 170, height: 170 }}
               />

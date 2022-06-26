@@ -2,11 +2,10 @@ import { Paper, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/styles";
 import { Box } from "@material-ui/system";
 import HttpsOutlinedIcon from "@mui/icons-material/HttpsOutlined";
-import MailOutlineIcon from "@mui/icons-material/MailOutline";
+import PersonOutlineRoundedIcon from "@mui/icons-material/PersonOutlineRounded";
 import VisibilityOffOutlinedIcon from "@mui/icons-material/VisibilityOffOutlined";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import {
-  Alert,
   Button,
   Container,
   FormControl,
@@ -16,14 +15,13 @@ import {
 import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
 import Link from "@mui/material/Link";
-import React, { useState } from "react";
+import { useState } from "react";
 import { useHistory } from "react-router-dom";
 import MainLayout from "../components/MainLayout";
-import AuthenticationService from "../service/AuthenticationService";
-import PersonOutlineRoundedIcon from "@mui/icons-material/PersonOutlineRounded";
 
 import { loginUser } from "../service/Service";
-import { loginUserWithToken } from "../service/Service";
+import Alert from "@mui/material/Alert";
+import Grid from "@mui/material/Grid";
 
 const useStyles = makeStyles({
   box: {
@@ -62,7 +60,6 @@ const LoginPage = () => {
     username: "",
   });
 
-  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [hasLoginFailed, setHasLoginFailed] = useState(false);
 
   const history = useHistory();
@@ -82,39 +79,14 @@ const LoginPage = () => {
     event.preventDefault();
   };
 
-  // const onClickLogin = async (event) => {
-  //   event.preventDefault();
-
-  // const response =
-  //   await AuthenticationService.executeBasicAuthenticationService(
-  //     values.email,
-  //     values.password
-  //   )
-  //     .then(() => {
-  //       //   console.log("CACAT");
-  //       //   loginUser(values.email, values.password);
-  //       //   history.push("/about");
-  //       //   setValues({ password: "", email: "" });
-  //       AuthenticationService.registerSuccessfulLogin(
-  //         values.email,
-  //         values.password
-  //       );
-  //       history.push("/about");
-  //     })
-  //     .catch((error) => {
-  //       console.log(error);
-  //       setShowSuccessMessage(false);
-  //       setHasLoginFailed(true);
-  //     });
-
-  // console.log("This is the response: " + response);
-  // };
-
   const onClickLogin = async (event) => {
     event.preventDefault();
     const response = await loginUser(values.username, values.password);
-    history.push("/about");
-    console.log(response);
+    if (response.status !== "200") {
+      history.push("/about");
+    } else {
+      setHasLoginFailed(true);
+    }
   };
 
   return (
@@ -123,24 +95,35 @@ const LoginPage = () => {
         <Paper style={{ borderRadius: 15 }}>
           <Container className={classes.loginContainer}>
             <form>
-              <Typography
-                variant="h4"
-                style={{
-                  fontWeight: "bold",
-                  textDecorationWidth: 5,
-                  "&::before": {
-                    content: "",
-                    position: "absolute",
-                    left: 0,
-                    bottom: 0,
-                    height: 3,
-                    width: 30,
-                    backgroundColor: "#f44040",
-                    borderRadius: 25,
-                  },
-                }}>
-                Login
-              </Typography>
+              <Grid container spacing={2}>
+                <Grid item xs={4}>
+                  <Typography
+                    variant="h4"
+                    style={{
+                      fontWeight: "bold",
+                      textDecorationWidth: 5,
+                      "&::before": {
+                        content: "",
+                        position: "absolute",
+                        left: 0,
+                        bottom: 0,
+                        height: 3,
+                        width: 30,
+                        backgroundColor: "#f44040",
+                        borderRadius: 25,
+                      },
+                    }}>
+                    Login
+                  </Typography>
+                </Grid>
+                <Grid item xs={8}>
+                  {hasLoginFailed && (
+                    <Alert severity="error">
+                      Username or password incorrect!
+                    </Alert>
+                  )}
+                </Grid>
+              </Grid>
               <FormControl
                 style={{ width: "100%", margin: "20px 0px" }}
                 sx={{ m: 1, width: "25ch" }}
