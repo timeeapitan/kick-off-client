@@ -1,11 +1,10 @@
 import { createTheme, ThemeProvider } from "@material-ui/core";
+import { CssBaseline } from "@mui/material";
 import * as React from "react";
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import Chat from "./components/Chat.js";
 import EditMatchForm from "./components/EditMatchForm.js";
 import MatchForm from "./components/MatchForm.js";
-import { MyCarousel } from "./components/MyCarousel.js";
-import ChatTryPage from "./pages/ChatTryPage.js";
 import ContactPage from "./pages/ContactPage";
 import ExplorePage from "./pages/ExplorePage";
 import FriendProfilePage from "./pages/FriendProfilePage.js";
@@ -20,7 +19,7 @@ import TeamsPage from "./pages/TeamsPage";
 const theme = createTheme({
   palette: {
     primary: {
-      main: "rgb(24 117 208)",
+      main: "#4169E1",
     },
     secondary: {
       main: "#006064",
@@ -38,6 +37,7 @@ const theme = createTheme({
 function App() {
   return (
     <ThemeProvider theme={theme}>
+      <CssBaseline />
       <Router>
         <Switch>
           <Route exact path="/">
@@ -67,20 +67,14 @@ function App() {
           <Route exact path="/schedule">
             <MatchForm />
           </Route>
-          <Route exact path="/edit-match">
+          <Route exact path="/edit-match/:id">
             <EditMatchForm />
-          </Route>
-          <Route exact path="/carousel">
-            <MyCarousel />
           </Route>
           <Route exact path="/profile">
             <ProfilePage />
           </Route>
           <Route exact path="/friends">
             <FriendsPage />
-          </Route>
-          <Route exact path="/chat-try-page">
-            <ChatTryPage />
           </Route>
           <Route exact path="/chat-try-room">
             <Chat />

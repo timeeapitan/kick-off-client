@@ -1,19 +1,24 @@
+import DeleteIcon from "@mui/icons-material/Delete";
 import SearchIcon from "@mui/icons-material/Search";
 import {
   Autocomplete,
   Box,
   Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   IconButton,
   InputAdornment,
   TextField,
 } from "@mui/material";
+import Button from "@mui/material/Button";
+import DialogContentText from "@mui/material/DialogContentText";
 import { DataGrid } from "@mui/x-data-grid";
 import axios from "axios";
 import moment from "moment";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import MainLayout from "../components/MainLayout";
-import Button from "@mui/material/Button";
-import DeleteIcon from "@mui/icons-material/Delete";
 import { makeStyles } from "@mui/styles";
 import { useHistory } from "react-router-dom";
 
@@ -39,6 +44,7 @@ const FriendsPage = () => {
   const [selectedIds, setSelectedIds] = useState([]);
   const [friend, setFriend] = useState("");
   const [refresh, setRefresh] = useState(false);
+  const [openPopUp, setOpenPopUp] = useState(false);
   const history = useHistory();
 
   useEffect(() => {
@@ -112,8 +118,7 @@ const FriendsPage = () => {
         }
       )
       .then((response) => {
-        const date = response.data;
-        return date;
+        return response.data;
       });
   };
 
@@ -154,6 +159,8 @@ const FriendsPage = () => {
     selectedIds.map((friendId) => {
       deleteFriendship(friendId);
     });
+
+    handleClosePopUp();
   };
 
   const handleSearchFriend = (friend) => {
@@ -165,6 +172,14 @@ const FriendsPage = () => {
         history.push("/friend-profile/" + users[i].id);
       }
     }
+  };
+
+  const handleOnOpenPopUp = () => {
+    setOpenPopUp(true);
+  };
+
+  const handleClosePopUp = () => {
+    setOpenPopUp(false);
   };
 
   async function populateRows(friends) {
@@ -254,11 +269,25 @@ const FriendsPage = () => {
             <Button
               startIcon={<DeleteIcon />}
               color="error"
-              onClick={deleteFriends}>
+              onClick={handleOnOpenPopUp}>
               Delete friends
             </Button>
           </Box>
         </Container>
+        <Dialog open={openPopUp} onClose={handleClosePopUp}>
+          <DialogTitle>{"Delete the team"}</DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              Are you sure you want to delete these friends?
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={deleteFriends} autoFocus>
+              Yes
+            </Button>
+            <Button onClick={handleClosePopUp}>No</Button>
+          </DialogActions>
+        </Dialog>
       </MainLayout>
     </>
   );

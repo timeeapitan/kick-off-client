@@ -79,7 +79,7 @@ const RegisterPage = () => {
   useEffect(() => {
     const timeId = setTimeout(() => {
       setShow(false);
-    }, 3000);
+    }, 1500);
 
     return () => {
       clearTimeout(timeId);

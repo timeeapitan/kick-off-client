@@ -57,7 +57,7 @@ const useStyles = makeStyles({
   containerStyle: { height: 150 },
 });
 
-const MatchForm = () => {
+const MatchForm = (props) => {
   const classes = useStyles();
   const history = useHistory();
 
@@ -66,7 +66,7 @@ const MatchForm = () => {
 
   const [matchTitle, setMatchTitle] = useState("");
   const [date, setDate] = useState(new Date());
-  const [finalDate, setFinalDate] = useState(new Date());
+  const [finalDate, setFinalDate] = useState("");
   const [startTime, setStartTime] = useState("");
   const [finalStartTime, setFinalStartTime] = useState("");
   const [duration, setDuration] = useState("");
@@ -76,11 +76,13 @@ const MatchForm = () => {
   const [noOfTeams, setNoOfTeams] = useState("");
   const [noOfPlayersPerTeam, setNoOfPlayersPerTeam] = useState("");
   const [cost, setCost] = useState("");
-  const [soloPlayersMode, setSoloPlayersMode] = useState("");
+  const [soloPlayersMode, setSoloPlayersMode] = useState(
+    props.soloPlayersMode != null ? props.playersMode : ""
+  );
   const [titleError, setTitleError] = useState(false);
   const [open, setOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState({});
-  const [showLocationButton, setShowLocationButton] = useState(true);
+  const [showLocationComponent, setShowLocationComponent] = useState(false);
   const [map, setMap] = useState(null);
   const latitude = parseInt(sessionStorage.getItem("locationLat"));
   const longitude = parseInt(sessionStorage.getItem("locationLng"));
@@ -148,7 +150,8 @@ const MatchForm = () => {
   };
 
   const handleOnChangeLocation = () => {
-    setShowLocationButton(false);
+    handleCloseDialog();
+    setShowLocationComponent(true);
   };
 
   const handleOpenDialog = (event) => {
@@ -160,7 +163,7 @@ const MatchForm = () => {
       return;
     }
 
-    setShowLocationButton(false);
+    setShowLocationComponent(false);
     setOpen(false);
   };
 
@@ -249,6 +252,7 @@ const MatchForm = () => {
             Title of the match
           </Typography>
           <TextField
+            value={matchTitle}
             onChange={handleOnChangeTitle}
             className={classes.field}
             fullWidth
@@ -340,7 +344,7 @@ const MatchForm = () => {
             className={classes.field}>
             Location
           </Typography>
-          {showLocationButton && locationLat != null && locationLng != null ? (
+          {locationLat != null && locationLng != null ? (
             <Button
               variant="contained"
               disableElevation
@@ -355,7 +359,7 @@ const MatchForm = () => {
             <Typography>The chosen location</Typography>
           )}
 
-          {!showLocationButton && (
+          {showLocationComponent && (
             <Box
               sx={{
                 width: 600,
@@ -405,11 +409,8 @@ const MatchForm = () => {
                 <FinalMap lat={45.9432} lng={24.9668} />
               </Box>
             </DialogContent>
-
             <DialogActions>
-              <Button onClick={(handleOnChangeLocation, handleCloseDialog)}>
-                Done
-              </Button>
+              <Button onClick={handleOnChangeLocation}>Done</Button>
             </DialogActions>
           </Dialog>
           <Typography

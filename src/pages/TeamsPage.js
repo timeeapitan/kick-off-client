@@ -67,6 +67,7 @@ const TeamsPage = () => {
   const [teamId, setTeamId] = useState("");
   const [currentUser, setCurrentUser] = useState({});
   const [refresh, setRefresh] = useState(false);
+  const [editMode, setEditMode] = useState(false);
 
   useEffect(() => {
     if (!rendered) {
@@ -117,6 +118,19 @@ const TeamsPage = () => {
       });
   };
 
+  const handleOnClickDeleteButton = async (teamId) => {
+    await axios
+      .delete("http://localhost:8080/team/deleteTeam?id=" + teamId, {
+        headers: { Authorization: token },
+      })
+      .then((response) => {
+        setRefresh(!refresh);
+      })
+      .catch((error) => {
+        throw new Error(error);
+      });
+  };
+
   const addTeam = async () => {
     await axios
       .post(
@@ -132,6 +146,36 @@ const TeamsPage = () => {
       )
       .then((response) => {
         console.log(response);
+        setRefresh(!refresh);
+        setEditMode(false);
+      })
+      .catch((error) => {
+        throw new Error(error);
+      });
+  };
+
+  const handleOnClickEditButton = (teamId, teamName, teamColor) => {
+    setIsClicked(true);
+    setEditMode(true);
+    setTeamId(teamId);
+    setTeamName(teamName);
+    setColor(teamColor);
+  };
+
+  const editTeam = async () => {
+    await axios
+      .put(
+        "http://localhost:8080/team/editTeam",
+        {
+          teamId: teamId,
+          name: teamName,
+          color: color,
+        },
+        {
+          headers: { Authorization: token },
+        }
+      )
+      .then((response) => {
         setRefresh(!refresh);
       })
       .catch((error) => {
@@ -150,8 +194,13 @@ const TeamsPage = () => {
   const handleSubmitForm = (event) => {
     event.preventDefault();
 
-    if (formRef.current.reportValidity()) {
+    if (!editMode && formRef.current.reportValidity()) {
       addTeam();
+      setIsClicked(false);
+      setTeamName("");
+      setColor("");
+    } else if (editMode && formRef.current.reportValidity()) {
+      editTeam();
       setIsClicked(false);
       setTeamName("");
       setColor("");
@@ -314,13 +363,19 @@ const TeamsPage = () => {
                     shirt={team.shirt}
                     isExplorePage={false}
                     isTeamsPage={true}
+                    handleOnClickDeleteButton={() =>
+                      handleOnClickDeleteButton(team.id)
+                    }
+                    handleOnClickEditButton={() =>
+                      handleOnClickEditButton(team.id, team.name, team.color)
+                    }
                   />
                 </Container>
               </Grid>
             </div>
           ))}
         </Grid>
-        <Grid container xs={12} md={6} lg={6}>
+        <Grid container xs={12} md={6} lg={6} justifyContent="center">
           {goToChat && (
             <Chat id={teamId} closeChat={() => setGoToChat(false)} />
           )}

@@ -19,9 +19,10 @@ import { useState } from "react";
 import { useHistory } from "react-router-dom";
 import MainLayout from "../components/MainLayout";
 
-import { loginUser } from "../service/Service";
 import Alert from "@mui/material/Alert";
 import Grid from "@mui/material/Grid";
+import { useEffect } from "react";
+import { loginUser } from "../service/Service";
 
 const useStyles = makeStyles({
   box: {
@@ -61,12 +62,21 @@ const LoginPage = () => {
   });
 
   const [hasLoginFailed, setHasLoginFailed] = useState(false);
-
   const history = useHistory();
 
   const handleChange = (prop) => (event) => {
     setValues({ ...values, [prop]: event.target.value });
   };
+
+  useEffect(() => {
+    const timeId = setTimeout(() => {
+      setHasLoginFailed(false);
+    }, 1500);
+
+    return () => {
+      clearTimeout(timeId);
+    };
+  }, [hasLoginFailed]);
 
   const handleClickShowPassword = () => {
     setValues({
@@ -81,10 +91,10 @@ const LoginPage = () => {
 
   const onClickLogin = async (event) => {
     event.preventDefault();
-    const response = await loginUser(values.username, values.password);
-    if (response.status !== "200") {
+    try {
+      const response = await loginUser(values.username, values.password);
       history.push("/about");
-    } else {
+    } catch (error) {
       setHasLoginFailed(true);
     }
   };

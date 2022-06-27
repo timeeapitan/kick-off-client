@@ -108,7 +108,7 @@ const ProfilePage = () => {
   useEffect(() => {
     const timeId = setTimeout(() => {
       setShowSuccessMessage(false);
-    }, 3000);
+    }, 1500);
 
     return () => {
       clearTimeout(timeId);

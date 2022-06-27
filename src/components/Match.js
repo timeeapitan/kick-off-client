@@ -73,6 +73,7 @@ const Match = (props) => {
   const [players, setPlayers] = useState([]);
   const [currentUser, setCurrentUser] = useState({});
   const [refresh, setRefresh] = useState(false);
+  const [disable, setDisable] = useState(false);
 
   const onLoad = React.useCallback(function callback(map) {
     const bounds = new window.google.maps.LatLngBounds(center);
@@ -89,7 +90,9 @@ const Match = (props) => {
 
   const restructuredDate = new Date(props.date);
   const month = restructuredDate.toLocaleString("default", { month: "short" });
-  const day = restructuredDate.getDay();
+  const day = restructuredDate.toLocaleDateString("default", {
+    day: "numeric",
+  });
   const fromHour = props.startTime.toString().substring(0, 2);
   const fromMinutes = props.startTime.toString().substring(3, 5);
 
@@ -154,12 +157,26 @@ const Match = (props) => {
   };
 
   const handleEditButton = () => {
-    history.push("/edit-match");
+    history.push("/edit-match/" + props.id);
   };
 
   useEffect(() => {
     getUser();
   }, []);
+
+  useEffect(() => {
+    const playerInMatch = players.some((player) => {
+      return player[2] == currentUser.username;
+    });
+
+    if (playerInMatch) {
+      setDisable(true);
+    }
+
+    if (props.availableSpots == 0) {
+      setDisable(true);
+    }
+  }, [players]);
 
   useEffect(() => {
     getAllPlayers();
@@ -357,7 +374,7 @@ const Match = (props) => {
               color="textSecondary"
               display="flex"
               justifyContent="center">
-              {props.soloPlayersMode ? "    Solo players" : "Team name"}
+              {props.soloPlayersMode ? "Solo players" : "For teams"}
             </Typography>
             <Typography
               variant="body2"
@@ -376,14 +393,17 @@ const Match = (props) => {
             </Typography>
           </Grid>
         </Grid>
-        <Box display="flex" justifyContent="center">
+        <Box display="flex" justifyContent="center" style={{ marginTop: 5 }}>
           {props.isExplorePage && (
             <Button
-              disabled={players.some((player) => {
-                return (
-                  player[2] == currentUser.username || props.availableSpots == 0
-                );
-              })}
+              variant="contained"
+              size="small"
+              sx={{
+                disabled: "#808080",
+                backgroundColor: "darkslateblue",
+                color: "white",
+              }}
+              disabled={disable}
               onClick={() => {
                 props.handleAddPlayerToMatch();
                 setRefresh(!refresh);

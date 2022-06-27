@@ -48,7 +48,7 @@ const ExplorePage = () => {
   useEffect(() => {
     const timeId = setTimeout(() => {
       setShow(false);
-    }, 3000);
+    }, 1500);
 
     return () => {
       clearTimeout(timeId);
@@ -144,7 +144,7 @@ const ExplorePage = () => {
               variant="outlined"
               sx={{
                 justifyContent: "center",
-                margin: "0px 150px",
+                margin: "0px 300px",
                 color: "#483D8B",
               }}>
               You have successfully joined a match! Check out the details for

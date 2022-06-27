@@ -1,6 +1,9 @@
 import { makeStyles } from "@material-ui/styles";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import CloseIcon from "@mui/icons-material/Close";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
+import EventAvailableIcon from "@mui/icons-material/EventAvailable";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import {
   Box,
@@ -15,12 +18,13 @@ import {
 import Accordion from "@mui/material/Accordion";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import AccordionSummary from "@mui/material/AccordionSummary";
+import DialogContentText from "@mui/material/DialogContentText";
+import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
+import { DataGrid } from "@mui/x-data-grid";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import MemberComponent from "./MemberComponent";
-import { DataGrid } from "@mui/x-data-grid";
-import DeleteIcon from "@mui/icons-material/Delete";
 
 const useStyles = makeStyles({
   field: {
@@ -61,6 +65,7 @@ const Team = (props) => {
   const [players, setPlayers] = useState([]);
   const [teamAdmin, setTeamAdmin] = useState({});
   const [refresh, setRefresh] = useState(false);
+  const [openPopUp, setOpenPopUp] = useState(false);
 
   useEffect(() => {
     getUserId();
@@ -102,6 +107,14 @@ const Team = (props) => {
       return;
     }
     setOpen(false);
+  };
+
+  const handleOnOpenPopUp = () => {
+    setOpenPopUp(true);
+  };
+
+  const handleClosePopUp = () => {
+    setOpenPopUp(false);
   };
 
   const getUserId = () => {
@@ -348,20 +361,49 @@ const Team = (props) => {
               ))}
             </Grid>
             <Grid
-              item
-              xs={12}
-              md={12}
-              lg={12}
-              display="flex"
-              justifyContent="flex-end">
-              <Button
-                style={{ color: "white", backgroundColor: "red" }}
-                variant="contained"
-                startIcon={<DeleteIcon style={{ fill: "white" }} />}>
-                Delete team
-              </Button>
+              container
+              direction="row"
+              justifyContent="space-around"
+              alignItems="center">
+              <Tooltip title="Schedule a match">
+                <Button
+                  style={{ color: "white", backgroundColor: "#5D3FD3" }}
+                  variant="contained">
+                  <EventAvailableIcon style={{ fill: "white" }} />
+                </Button>
+              </Tooltip>
+              <Tooltip title="Edit team">
+                <Button
+                  onClick={props.handleOnClickEditButton}
+                  style={{ color: "white", backgroundColor: "green" }}
+                  variant="contained">
+                  <EditIcon style={{ fill: "white" }} />
+                </Button>
+              </Tooltip>
+              <Tooltip title="Delete team">
+                <Button
+                  onClick={handleOnOpenPopUp}
+                  style={{ color: "white", backgroundColor: "red" }}
+                  variant="contained">
+                  <DeleteIcon style={{ fill: "white" }} />
+                </Button>
+              </Tooltip>
             </Grid>
           </Grid>
+          <Dialog open={openPopUp} onClose={handleClosePopUp}>
+            <DialogTitle>{"Delete the team"}</DialogTitle>
+            <DialogContent>
+              <DialogContentText>
+                Are you sure you want to delete the selected team?
+              </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={props.handleOnClickDeleteButton} autoFocus>
+                Yes
+              </Button>
+              <Button onClick={handleClosePopUp}>No</Button>
+            </DialogActions>
+          </Dialog>
         </AccordionDetails>
       </Accordion>
     </div>

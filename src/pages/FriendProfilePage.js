@@ -32,9 +32,8 @@ const useStyles = makeStyles({
   },
 });
 
-const FriendProfilePage = (props) => {
+const FriendProfilePage = () => {
   const classes = useStyles();
-  const user = props.user;
 
   const token = sessionStorage.getItem("token");
   const username = sessionStorage.getItem("username");

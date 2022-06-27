@@ -24,12 +24,14 @@ import {
   LocalizationProvider,
   TimePicker,
 } from "@mui/x-date-pickers";
-import axios from "axios";
+import axios, { Axios } from "axios";
 import moment from "moment";
-import { useState } from "react";
-import { useHistory } from "react-router-dom";
+import { useState, useRef, useEffect } from "react";
+import { useHistory, useParams } from "react-router-dom";
 import FinalMap from "../google-maps-api/FinalMap";
 import MainLayout from "./MainLayout";
+import { GoogleMap, Marker } from "@react-google-maps/api";
+import { useCallback } from "react";
 
 const useStyles = makeStyles({
   field: {
@@ -54,34 +56,48 @@ const useStyles = makeStyles({
     minWidth: "80vh",
     maxWidth: "80vh",
   },
+  containerStyle: { height: 150 },
+  buttonContainer: {
+    justifyContent: "center",
+    margin: "30px",
+  },
 });
 
 const EditMatchForm = (props) => {
   const classes = useStyles();
   const history = useHistory();
-  const [matchTitle, setMatchTitle] = useState(props.match.matchTitle);
-  const [date, setDate] = useState(new Date());
-  const [finalDate, setFinalDate] = useState(props.match.finalDate);
-  const [startTime, setStartTime] = useState("");
-  const [finalStartTime, setFinalStartTime] = useState(
-    props.match.finalStartTime
-  );
-  const [duration, setDuration] = useState(props.match.duration);
-  const [locationLat, setLocationLat] = useState(props.match.locationLat);
-  const [locationLng, setLocationLng] = useState(props.match.locationLng);
-  const [locationNotes, setLocationNotes] = useState(props.match.locationNotes);
-  const [noOfTeams, setNoOfTeams] = useState(props.match.noOfTeams);
-  const [noOfPlayersPerTeam, setNoOfPlayersPerTeam] = useState(
-    props.match.noOfPlayersPerTeam
-  );
-  const [cost, setCost] = useState(props.match.cost);
-  const [soloPlayersMode, setSoloPlayersMode] = useState(
-    props.match.soloPlayersMode
-  );
-  const [titleError, setTitleError] = useState(false);
-  const [open, setOpen] = useState(false);
+  const params = useParams();
+  const matchId = params.id;
+  const token = sessionStorage.getItem("token");
 
-  const dialogStyle = { maxWidth: 1000, backgroundColor: "transparent" };
+  const [matchTitle, setMatchTitle] = useState("");
+  const [date, setDate] = useState(new Date());
+  const [finalDate, setFinalDate] = useState("");
+  const [startTime, setStartTime] = useState("");
+  const [finalStartTime, setFinalStartTime] = useState("");
+  const [duration, setDuration] = useState("");
+  const [locationLat, setLocationLat] = useState("");
+  const [locationLng, setLocationLng] = useState("");
+  const [locationNotes, setLocationNotes] = useState("");
+  const [noOfTeams, setNoOfTeams] = useState("");
+  const [noOfPlayersPerTeam, setNoOfPlayersPerTeam] = useState("");
+  const [cost, setCost] = useState("");
+  const [soloPlayersMode, setSoloPlayersMode] = useState("");
+  const [titleError, setTitleError] = useState(false);
+  const [showLocationComponent, setShowLocationComponent] = useState(true);
+  const [open, setOpen] = useState(false);
+  const [map, setMap] = useState(null);
+  const [center, setCenter] = useState({
+    lat: 45.7935607,
+    lng: 24.1212945,
+  });
+
+  const options = {
+    disableDefaultUI: true,
+    zoomControl: true,
+  };
+
+  const formRef = useRef();
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -99,7 +115,12 @@ const EditMatchForm = (props) => {
     setDuration(event.target.value);
   };
 
-  const handleOnChangeLocation = () => {};
+  const handleOnChangeLocation = () => {
+    setLocationLat(sessionStorage.getItem("locationLat"));
+    setLocationLng(sessionStorage.getItem("locationLng"));
+    handleCloseDialog();
+    setShowLocationComponent(true);
+  };
 
   const handleOpenDialog = (event) => {
     setOpen(true);
@@ -113,23 +134,92 @@ const EditMatchForm = (props) => {
     setOpen(false);
   };
 
+  const onLoad = useCallback(function callback(map) {
+    const bounds = new window.google.maps.LatLngBounds(center);
+    map.fitBounds(bounds);
+    window.google.maps.event.addListenerOnce(map, "zoom_changed", function () {
+      map.setZoom(15);
+    });
+    setMap(map);
+  }, []);
+
+  const onUnmount = useCallback(function callback(map) {
+    setMap(null);
+  }, []);
+
+  const convertTime = (time) => {
+    let finalTime = moment(time).format("hh:mm:ss");
+    return finalTime;
+  };
+
+  const getMatchById = async () => {
+    await axios
+      .get("http://localhost:8080/match/getMatchById?id=" + matchId, {
+        headers: { Authorization: token },
+      })
+      .then((response) => {
+        console.log("Match on edit page");
+        console.log(response);
+        setSoloPlayersMode(response.data.soloPlayersMode);
+        setMatchTitle(response.data.matchTitle);
+        setFinalDate(response.data.date);
+        setFinalStartTime(response.data.startTime);
+        setDuration(response.data.duration);
+        setLocationNotes(response.data.locationNotes);
+        setNoOfTeams(response.data.noOfTeams);
+        setNoOfPlayersPerTeam(response.data.noOfPlayersPerTeam);
+        setCost(response.data.cost);
+        setCenter({
+          lat: response.data.locationLat,
+          lng: response.data.locationLng,
+        });
+        console.log("this is the center");
+        console.log(center);
+        setShowLocationComponent(true);
+      })
+      .catch((err) => {
+        throw new Error(err);
+      });
+  };
+
+  useState(() => {
+    getMatchById(matchId);
+  }, [matchId]);
+
+  useEffect(() => {
+    setCenter({
+      lat: sessionStorage.getItem("locationLat"),
+      lng: sessionStorage.getItem("locationLng"),
+    });
+  }, [locationLat, locationLng]);
+
+  useEffect(() => {
+    setLocationLat(sessionStorage.getItem("locationLat"));
+    setLocationLng(sessionStorage.getItem("locationLng"));
+  }, []);
+
   const handleSubmitForm = (event) => {
     event.preventDefault();
+
+    formRef.current.reportValidity();
     const token = sessionStorage.getItem("token");
+
     axios
-      .post(
-        "http://localhost:8080/match/addMatch",
+      .put(
+        "http://localhost:8080/match/editMatch",
         {
+          id: matchId,
           matchTitle: matchTitle,
           date: date,
           startTime: startTime,
           duration: duration,
           locationLat: locationLat,
           locationLng: locationLng,
+          locationNotes: locationNotes,
           noOfTeams: noOfTeams,
           noOfPlayersPerTeam: noOfPlayersPerTeam,
-          cost: cost,
           soloPlayersMode: soloPlayersMode,
+          cost: cost,
         },
         { headers: { Authorization: token } }
       )
@@ -157,11 +247,13 @@ const EditMatchForm = (props) => {
           color="textSecondary"
           component="h2"
           gutterBottom
-          className={(classes.title, classes.field)}>
+          className={(classes.title, classes.field)}
+          display="flex"
+          justifyContent="center">
           Edit the selected match
         </Typography>
 
-        <form autoComplete="on" onSubmit={handleSubmit}>
+        <form autoComplete="on" onSubmit={handleSubmit} required ref={formRef}>
           <Typography
             variant="h6"
             color="textSecondary"
@@ -193,6 +285,7 @@ const EditMatchForm = (props) => {
             Title of the match
           </Typography>
           <TextField
+            value={matchTitle}
             onChange={handleOnChangeTitle}
             className={classes.field}
             fullWidth
@@ -296,7 +389,26 @@ const EditMatchForm = (props) => {
               Search a location
             </Button>
           ) : (
-            "Altceva"
+            <Typography>The chosen location</Typography>
+          )}
+          {showLocationComponent && (
+            <Box
+              sx={{
+                width: 600,
+                paddingTop: 2,
+                paddingBottom: 2,
+              }}
+              fullWidth>
+              <GoogleMap
+                mapContainerClassName={classes.containerStyle}
+                center={center}
+                options={options}
+                zoom={15}
+                onLoad={onLoad}
+                onUnmount={onUnmount}>
+                <Marker position={center} />
+              </GoogleMap>
+            </Box>
           )}
           <Dialog
             open={open}
@@ -337,11 +449,8 @@ const EditMatchForm = (props) => {
                 <FinalMap />
               </Box>
             </DialogContent>
-
             <DialogActions>
-              <Button onClick={(handleCloseDialog, handleOnChangeLocation)}>
-                Done
-              </Button>
+              <Button onClick={handleOnChangeLocation}>Done</Button>
             </DialogActions>
           </Dialog>
           <Typography
@@ -355,6 +464,7 @@ const EditMatchForm = (props) => {
           <TextField
             onChange={(event) => setLocationNotes(event.target.value)}
             className={classes.field}
+            value={locationNotes}
             multiline
             rows={3}
             fullWidth
@@ -442,10 +552,9 @@ const EditMatchForm = (props) => {
             onChange={(event) => {
               setCost(event.target.value);
               console.log("LAT" + sessionStorage.getItem("locationLat"));
-              setLocationLat(sessionStorage.getItem("locationLat"));
-              setLocationLng(sessionStorage.getItem("locationLng"));
             }}
             className={classes.field}
+            value={cost}
             multiline
             rows={3}
             fullWidth

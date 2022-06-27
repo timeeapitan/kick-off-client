@@ -118,7 +118,7 @@ const MyAppBar = () => {
   const handleLogoutButton = () => {
     AuthenticationService.logout();
     setIsUserLoggedIn(false);
-    history.push("/about");
+    history.push("/login");
   };
 
   const handleRegisterButton = () => {
@@ -235,7 +235,6 @@ const MyAppBar = () => {
                         history.push("/friends");
                         handleCloseUserMenu();
                       } else if (setting === "Logout") {
-                        history.push("/about");
                         handleCloseUserMenu();
                         handleLogoutButton();
                       }

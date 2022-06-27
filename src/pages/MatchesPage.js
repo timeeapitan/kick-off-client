@@ -133,6 +133,7 @@ const MatchesPage = () => {
             {matches.map((match) => (
               <Match
                 key={match.id}
+                id={match.id}
                 title={match.matchTitle}
                 date={match.date}
                 locationLat={match.locationLat}

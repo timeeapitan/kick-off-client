@@ -22,6 +22,7 @@ const useStyles = makeStyles({
     width: "100%",
     height: "63vh",
     flexBasis: "100%",
+    borderColor: "beige",
   },
   headBG: {
     backgroundColor: "#e0e0e0",
