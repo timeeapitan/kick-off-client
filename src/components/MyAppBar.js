@@ -17,6 +17,7 @@ import { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import logo from "../assets/logo/logo.png";
 import AuthenticationService from "../service/AuthenticationService";
+import Notifications from "react-notifications-menu";
 
 const pages = ["About", "Explore", "Matches", "Teams", "Contact us"];
 const settings = ["Profile", "Friends", "Logout"];
@@ -36,6 +37,7 @@ const MyAppBar = () => {
   const token = sessionStorage.getItem("token");
   const [currentUser, setCurrentUser] = useState("");
   const [username, setUsername] = useState(sessionStorage.getItem("username"));
+  const [showNotification, setShowNotification] = useState(false);
 
   useEffect(() => {
     getUser(username);
@@ -195,12 +197,44 @@ const MyAppBar = () => {
           {isUserLoggedIn && (
             <Box sx={{ flexGrow: 0 }}>
               <IconButton
+                onClick={() => setShowNotification(true)}
                 size="small"
                 style={{ color: "#fafafa", marginRight: 15 }}>
                 <Badge badgeContent={1} color="error">
                   <NotificationsIcon />
                 </Badge>
               </IconButton>
+              {/* {showNotification && (
+                <Notifications
+                  data={[
+                    {
+                      image: logo,
+                      message: "Kameshwaran S had shared a feedback with you.",
+                      detailPage: "/",
+                    },
+                    {
+                      image: logo,
+                      message: (
+                        <p>
+                          Kameshwaran S had shared a{" "}
+                          <span style={{ color: "#7ac2fa" }}>feedback</span>{" "}
+                          with you.
+                        </p>
+                      ),
+                      detailPage: "/",
+                    },
+                  ]}
+                  header={{
+                    title: "Notifications",
+                    option: {
+                      text: "View All",
+                      onClick: () => console.log("Clicked"),
+                    },
+                  }}
+                  // classNamePrefix="okrjoy"
+                  // icon={bell}
+                />
+              )} */}
               <Tooltip title="Open settings">
                 <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
                   {hasProfilePicture && (

@@ -1,14 +1,13 @@
 import { makeStyles } from "@material-ui/styles";
-import { Button, Grid } from "@mui/material";
-import { useJsApiLoader } from "@react-google-maps/api";
-import axios from "axios";
-import React, { useEffect, useState } from "react";
-import { useHistory } from "react-router-dom";
-import MainLayout from "../components/MainLayout";
-import Match from "../components/Match";
+import { Grid } from "@mui/material";
+import Alert from "@mui/material/Alert";
 import Link from "@mui/material/Link";
 import Typography from "@mui/material/Typography";
-import Alert from "@mui/material/Alert";
+import { useJsApiLoader } from "@react-google-maps/api";
+import axios from "axios";
+import { useEffect, useState } from "react";
+import MainLayout from "../components/MainLayout";
+import Match from "../components/Match";
 
 const useStyles = makeStyles({
   container: {
@@ -21,13 +20,12 @@ const useStyles = makeStyles({
 });
 
 const ExplorePage = () => {
-  const [matches, getMatches] = useState("");
   const classes = useStyles();
-  const history = useHistory();
 
   const token = sessionStorage.getItem("token");
   const username = sessionStorage.getItem("username");
 
+  const [matches, getMatches] = useState("");
   const [refreshMatches, setRefreshMatches] = useState(false);
   const [currentUser, setCurrentUser] = useState({});
   const [show, setShow] = useState(false);
@@ -38,12 +36,12 @@ const ExplorePage = () => {
   });
 
   useEffect(() => {
-    getAllMatches();
-  }, [refreshMatches]);
-
-  useEffect(() => {
     getUser();
   }, []);
+
+  useEffect(() => {
+    getAllMatches();
+  }, [refreshMatches]);
 
   useEffect(() => {
     const timeId = setTimeout(() => {
@@ -75,39 +73,23 @@ const ExplorePage = () => {
       });
   };
 
-  const getAllMatches = () => {
+  const getAllMatches = async () => {
     const token = sessionStorage.getItem("token");
 
-    return axios
-      .get("http://localhost:8080/match/getAll", {
-        headers: {
-          Authorization: token,
-        },
-      })
-      .then((response) => {
-        const allMatches = response.data;
-        getMatches(allMatches);
-        console.log(allMatches);
-      })
-      .catch((error) => {
-        throw new Error(error.message);
-      });
-  };
-
-  const handleOnDeleteClick = async (id) => {
-    await axios
-      .delete("http://localhost:8080/match/deleteMatch?id=" + id, {
-        headers: {
-          Authorization: token,
-        },
-      })
-      .then((response) => {
-        console.log(response);
-        setRefreshMatches(!refreshMatches);
-      })
-      .catch((err) => {
-        throw new Error(err);
-      });
+    try {
+      const response = await axios.get(
+        "http://localhost:8080/match/getAll?currentUserId=" + currentUser.id,
+        {
+          headers: {
+            Authorization: token,
+          },
+        }
+      );
+      const allMatches = response.data;
+      getMatches(allMatches);
+    } catch (error) {
+      throw new Error(error.message);
+    }
   };
 
   const handleAddPlayerToMatch = async (matchId) => {
@@ -131,6 +113,24 @@ const ExplorePage = () => {
       })
       .catch((error) => {
         throw new Error(error);
+      });
+  };
+
+  const handleAddTeamToMatch = async (matchId) => {
+    await axios
+      .post(
+        "http://localhost:8080/match/addTeamToMatch",
+        {
+          matchId: matchId,
+          teamId: sessionStorage.getItem("enrolledTeam"),
+        },
+        {
+          headers: { Authorization: token },
+        }
+      )
+      .then(() => {
+        setRefreshMatches(!refreshMatches);
+        setShow(!show);
       });
   };
 
@@ -185,14 +185,14 @@ const ExplorePage = () => {
               availableSpots={
                 match.availableSpots > 0 ? match.availableSpots : 0
               }
-              handleOnDeleteClick={() => {
-                handleOnDeleteClick(match.id);
-              }}
               height={120}
               isExplorePage={true}
               id={match.id}
               handleAddPlayerToMatch={() => {
                 handleAddPlayerToMatch(match.id);
+              }}
+              handleAddTeamToMatch={() => {
+                handleAddTeamToMatch(match.id);
               }}
             />
           ))}

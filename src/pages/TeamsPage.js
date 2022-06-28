@@ -357,6 +357,8 @@ const TeamsPage = () => {
                 <Container style={{ width: 500 }}>
                   <Team
                     key={team.id}
+                    teamAdmin={team.admin.id}
+                    currentUser={currentUser.id}
                     teamId={team.id}
                     name={team.name}
                     goToChat={() => onGoToChatClick(team.id, true)}

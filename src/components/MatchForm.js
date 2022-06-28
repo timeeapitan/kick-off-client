@@ -32,6 +32,7 @@ import { useHistory } from "react-router-dom";
 import FinalMap from "../google-maps-api/FinalMap";
 import MainLayout from "./MainLayout";
 import { useCallback } from "react";
+import DialogContentText from "@mui/material/DialogContentText";
 
 const useStyles = makeStyles({
   field: {
@@ -63,6 +64,10 @@ const MatchForm = (props) => {
 
   const token = sessionStorage.getItem("token");
   const username = sessionStorage.getItem("username");
+  const [openPopUp, setOpenPopUp] = useState(false);
+  const [showNext, setShowNext] = useState(false);
+  const [selectedTeam, setSelectedTeam] = useState("");
+  const [teams, setTeams] = useState([]);
 
   const [matchTitle, setMatchTitle] = useState("");
   const [date, setDate] = useState(new Date());
@@ -76,9 +81,8 @@ const MatchForm = (props) => {
   const [noOfTeams, setNoOfTeams] = useState("");
   const [noOfPlayersPerTeam, setNoOfPlayersPerTeam] = useState("");
   const [cost, setCost] = useState("");
-  const [soloPlayersMode, setSoloPlayersMode] = useState(
-    props.soloPlayersMode != null ? props.playersMode : ""
-  );
+  const [availableSpots, setAvailableSpots] = useState(null);
+  const [soloPlayersMode, setSoloPlayersMode] = useState("");
   const [titleError, setTitleError] = useState(false);
   const [open, setOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState({});
@@ -100,6 +104,10 @@ const MatchForm = (props) => {
   useEffect(() => {
     getUser();
   }, []);
+
+  useEffect(() => {
+    getTeamsByAdmin();
+  }, [currentUser]);
 
   const onLoad = useCallback(function callback(map) {
     const bounds = new window.google.maps.LatLngBounds(center);
@@ -131,6 +139,14 @@ const MatchForm = (props) => {
       .catch((err) => {
         throw new Error(err);
       });
+  };
+
+  const handleOnOpenPopUp = () => {
+    setOpenPopUp(true);
+  };
+
+  const handleClosePopUp = () => {
+    setOpenPopUp(false);
   };
 
   const handleSubmit = (event) => {
@@ -167,6 +183,16 @@ const MatchForm = (props) => {
     setOpen(false);
   };
 
+  const handleSetAvailableSpots = () => {
+    if (soloPlayersMode) {
+      setAvailableSpots(noOfTeams * noOfPlayersPerTeam);
+    } else {
+      setNoOfPlayersPerTeam(0);
+      setNoOfTeams(0);
+      setAvailableSpots(2);
+    }
+  };
+
   const handleSubmitForm = (event) => {
     event.preventDefault();
 
@@ -187,12 +213,51 @@ const MatchForm = (props) => {
           noOfPlayersPerTeam: noOfPlayersPerTeam,
           cost: cost,
           soloPlayersMode: soloPlayersMode,
-          availableSpots: noOfTeams * noOfPlayersPerTeam,
+          availableSpots: availableSpots,
           admin: currentUser,
         },
         { headers: { Authorization: token } }
       )
-      .then((res) => {
+      .then(() => {
+        if (!soloPlayersMode) {
+          setShowNext(true);
+        } else {
+          history.push("/matches");
+        }
+      })
+      .catch((error) => {
+        throw new Error(error);
+      });
+  };
+
+  const getTeamsByAdmin = async () => {
+    await axios
+      .get(
+        "http://localhost:8080/team/getTeamsByAdminOnly?adminId=" +
+          currentUser.id,
+        {
+          headers: { Authorization: token },
+        }
+      )
+      .then((response) => {
+        setTeams(response.data);
+      });
+  };
+
+  const handleAddTeamToMatch = async () => {
+    await axios
+      .post(
+        "http://localhost:8080/match/addTeamToMatchByAdminAndTitle",
+        {
+          teamId: selectedTeam,
+          adminId: currentUser.id,
+          title: matchTitle,
+        },
+        {
+          headers: { Authorization: token },
+        }
+      )
+      .then(() => {
         setMatchTitle("");
         setDate("");
         setFinalDate("");
@@ -517,6 +582,7 @@ const MatchForm = (props) => {
               console.log("LAT" + sessionStorage.getItem("locationLat"));
               setLocationLat(sessionStorage.getItem("locationLat"));
               setLocationLng(sessionStorage.getItem("locationLng"));
+              handleSetAvailableSpots();
             }}
             className={classes.field}
             multiline
@@ -527,20 +593,65 @@ const MatchForm = (props) => {
             required
             error={titleError}
           />
-          <Box
-            component="span"
-            m={1}
-            className={classes.box}
-            style={{ margin: "0px" }}>
-            <Button
-              variant="contained"
-              color="secondary"
-              type="submit"
-              onClick={handleSubmitForm}>
-              Done
-            </Button>
-          </Box>
+          {!showNext && (
+            <Box
+              component="span"
+              m={1}
+              className={classes.box}
+              style={{ margin: "0px" }}>
+              <Button
+                variant="contained"
+                color="secondary"
+                type="submit"
+                onClick={handleSubmitForm}>
+                Done
+              </Button>
+            </Box>
+          )}
         </form>
+        {showNext && (
+          <>
+            <Typography
+              variant="h6"
+              color="textSecondary"
+              component="h2"
+              gutterBottom
+              className={classes.field}>
+              You have scheduled a match for teams only. Add one of your teams
+              to the event.
+            </Typography>
+            <FormControl
+              className={classes.field}
+              fullWidth
+              required
+              error={titleError}>
+              <InputLabel>Teams</InputLabel>
+              <Select
+                label="Teams"
+                value={selectedTeam}
+                onChange={(event) => setSelectedTeam(event.target.value)}>
+                {teams.map((team) => (
+                  <MenuItem key={team.id} value={team.id}>
+                    {team.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <Box
+              component="span"
+              m={1}
+              className={classes.box}
+              style={{ margin: "0px" }}>
+              <Button
+                variant="contained"
+                color="secondary"
+                type="submit"
+                onClick={handleAddTeamToMatch}>
+                Done
+              </Button>
+            </Box>
+          </>
+        )}
       </Container>
     </MainLayout>
   );

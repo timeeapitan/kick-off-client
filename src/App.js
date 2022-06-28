@@ -15,6 +15,7 @@ import MatchesPage from "./pages/MatchesPage";
 import ProfilePage from "./pages/ProfilePage";
 import RegisterPage from "./pages/RegisterPage.js";
 import TeamsPage from "./pages/TeamsPage";
+import Notification from "./components/Notification.js";
 
 const theme = createTheme({
   palette: {
@@ -78,6 +79,9 @@ function App() {
           </Route>
           <Route exact path="/chat-try-room">
             <Chat />
+          </Route>
+          <Route exact path="/notification">
+            <Notification />
           </Route>
           <Route exact path="/friend-profile/:id">
             <FriendProfilePage />

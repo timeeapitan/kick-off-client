@@ -24,6 +24,9 @@ import { useEffect, useState } from "react";
 import Geocode from "react-geocode";
 import { useHistory } from "react-router-dom";
 import MatchDetails from "./MatchDetails";
+import FormControl from "@mui/material/FormControl";
+import InputLabel from "@mui/material/InputLabel";
+import Select from "@mui/material/Select";
 
 const useStyles = makeStyles({
   card: {
@@ -64,16 +67,21 @@ const Match = (props) => {
   const history = useHistory();
 
   const center = { lat: props.locationLat, lng: props.locationLng };
-
   const token = sessionStorage.getItem("token");
   const username = sessionStorage.getItem("username");
 
   const [map, setMap] = React.useState(null);
   const [openPopUp, setOpenPopUp] = useState(false);
+  const [openEnrollPopUp, setOpenEnrollPopUp] = useState(false);
   const [players, setPlayers] = useState([]);
+  const [teams, setTeams] = useState([]);
+  const [matchTeams, setMatchTeams] = useState([]);
+  const [enrolledTeam, setEnrolledTeam] = useState("");
   const [currentUser, setCurrentUser] = useState({});
   const [refresh, setRefresh] = useState(false);
-  const [disable, setDisable] = useState(false);
+  const [disableParticipateBtn, setDisableParticipateBtn] = useState(false);
+  const [disableEnrollBtn, setDisableEnrollBtn] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
 
   const onLoad = React.useCallback(function callback(map) {
     const bounds = new window.google.maps.LatLngBounds(center);
@@ -95,7 +103,6 @@ const Match = (props) => {
   });
   const fromHour = props.startTime.toString().substring(0, 2);
   const fromMinutes = props.startTime.toString().substring(3, 5);
-
   const finalHour = computeHours(props.startTime, props.duration);
   const finalInterval = finalHour + ":" + fromMinutes;
 
@@ -156,8 +163,30 @@ const Match = (props) => {
     setAnchorElNav(null);
   };
 
+  const handleOpenDetails = () => {
+    setShowDetails(true);
+  };
+
+  const handleCloseDetails = () => {
+    setShowDetails(false);
+  };
+
+  const handleOpenEnrollPopUp = () => {
+    setOpenEnrollPopUp(true);
+  };
+
+  const handleCloseEnrollPopUp = () => {
+    setRefresh(!refresh);
+    setOpenEnrollPopUp(false);
+  };
+
   const handleEditButton = () => {
     history.push("/edit-match/" + props.id);
+  };
+
+  const handleOnChangeEnrolledTeam = (event) => {
+    setEnrolledTeam(event.target.value);
+    sessionStorage.setItem("enrolledTeam", event.target.value);
   };
 
   useEffect(() => {
@@ -165,18 +194,33 @@ const Match = (props) => {
   }, []);
 
   useEffect(() => {
+    getTeamsByAdmin();
+  }, [currentUser]);
+
+  useEffect(() => {
+    getAllTeamsByMatch();
+  }, [props.matchId, refresh]);
+
+  useEffect(() => {
     const playerInMatch = players.some((player) => {
       return player[2] == currentUser.username;
     });
 
     if (playerInMatch) {
-      setDisable(true);
+      setDisableParticipateBtn(true);
     }
 
     if (props.availableSpots == 0) {
-      setDisable(true);
+      setDisableParticipateBtn(true);
+      setDisableEnrollBtn(true);
     }
   }, [players]);
+
+  useEffect(() => {
+    if (props.availableSpots == 0) {
+      setDisableEnrollBtn(true);
+    }
+  }, [matchTeams]);
 
   useEffect(() => {
     getAllPlayers();
@@ -201,6 +245,21 @@ const Match = (props) => {
       });
   };
 
+  const getTeamsByAdmin = async () => {
+    await axios
+      .get(
+        "http://localhost:8080/team/getTeamsByAdminOnly?adminId=" +
+          currentUser.id,
+        {
+          headers: { Authorization: token },
+        }
+      )
+      .then((response) => {
+        setTeams(response.data);
+        console.log(response.data);
+      });
+  };
+
   const getAllPlayers = async () => {
     await axios
       .get(
@@ -215,6 +274,27 @@ const Match = (props) => {
       .then((response) => {
         setPlayers(response.data);
         console.log("PLAYERS");
+        console.log(response.data);
+      })
+      .catch((error) => {
+        throw new Error(error);
+      });
+  };
+
+  const getAllTeamsByMatch = async () => {
+    await axios
+      .get(
+        "http://localhost:8080/match/getTeamsFromMatch?matchId=" +
+          props.matchId,
+        {
+          headers: {
+            Authorization: token,
+          },
+        }
+      )
+      .then((response) => {
+        setMatchTeams(response.data);
+        console.log("TEAMS FROM MATCH");
         console.log(response.data);
       })
       .catch((error) => {
@@ -286,6 +366,27 @@ const Match = (props) => {
                   </DialogActions>
                 </Dialog>
                 <MenuItem onClick={handleEditButton}>Edit</MenuItem>
+                <MenuItem onClick={handleOpenDetails}>See details</MenuItem>
+                {props.soloPlayersMode && (
+                  <MatchDetails
+                    soloPlayersMode={props.soloPlayersMode}
+                    openPopUp={showDetails}
+                    handleClosePopUp={handleCloseDetails}
+                    players={players}
+                    cost={props.cost}
+                    locationNotes={props.locationNotes}
+                  />
+                )}
+                {!props.soloPlayersMode && (
+                  <MatchDetails
+                    soloPlayersMode={props.soloPlayersMode}
+                    openPopUp={showDetails}
+                    handleClosePopUp={handleCloseDetails}
+                    teams={matchTeams}
+                    cost={props.cost}
+                    locationNotes={props.locationNotes}
+                  />
+                )}
               </Menu>
             )}
             {props.isExplorePage && (
@@ -307,13 +408,26 @@ const Match = (props) => {
                   display: "block",
                 }}>
                 <MenuItem onClick={handleOnOpenPopUp}>See details</MenuItem>
-                <MatchDetails
-                  openPopUp={openPopUp}
-                  handleClosePopUp={handleClosePopUp}
-                  players={players}
-                  cost={props.cost}
-                  locationNotes={props.locationNotes}
-                />
+                {props.soloPlayersMode && (
+                  <MatchDetails
+                    soloPlayersMode={props.soloPlayersMode}
+                    openPopUp={openPopUp}
+                    handleClosePopUp={handleClosePopUp}
+                    players={players}
+                    cost={props.cost}
+                    locationNotes={props.locationNotes}
+                  />
+                )}
+                {!props.soloPlayersMode && (
+                  <MatchDetails
+                    soloPlayersMode={props.soloPlayersMode}
+                    openPopUp={openPopUp}
+                    handleClosePopUp={handleClosePopUp}
+                    teams={matchTeams}
+                    cost={props.cost}
+                    locationNotes={props.locationNotes}
+                  />
+                )}
               </Menu>
             )}
           </Box>
@@ -374,16 +488,18 @@ const Match = (props) => {
               color="textSecondary"
               display="flex"
               justifyContent="center">
-              {props.soloPlayersMode ? "Solo players" : "For teams"}
+              {props.soloPlayersMode ? "Solo players only" : "For teams only"}
             </Typography>
-            <Typography
-              variant="body2"
-              color="textSecondary"
-              display="flex"
-              justifyContent="center">
-              {props.noOfTeams + " teams"} x {"  "}
-              {props.noOfPlayersPerTeam + " players"}
-            </Typography>
+            {props.soloPlayersMode && (
+              <Typography
+                variant="body2"
+                color="textSecondary"
+                display="flex"
+                justifyContent="center">
+                {props.noOfTeams + " teams"} x {"  "}
+                {props.noOfPlayersPerTeam + " players"}
+              </Typography>
+            )}
             <Typography
               variant="body2"
               color="textSecondary"
@@ -394,7 +510,7 @@ const Match = (props) => {
           </Grid>
         </Grid>
         <Box display="flex" justifyContent="center" style={{ marginTop: 5 }}>
-          {props.isExplorePage && (
+          {props.isExplorePage && props.soloPlayersMode && (
             <Button
               variant="contained"
               size="small"
@@ -403,13 +519,65 @@ const Match = (props) => {
                 backgroundColor: "darkslateblue",
                 color: "white",
               }}
-              disabled={disable}
+              disabled={disableParticipateBtn}
               onClick={() => {
                 props.handleAddPlayerToMatch();
                 setRefresh(!refresh);
               }}>
               I want to participate
             </Button>
+          )}
+          {props.isExplorePage && !props.soloPlayersMode && (
+            <>
+              <Button
+                variant="contained"
+                size="small"
+                sx={{
+                  disabled: "#808080",
+                  backgroundColor: "darkslateblue",
+                  color: "white",
+                  marginTop: 2,
+                }}
+                disabled={disableEnrollBtn}
+                onClick={() => {
+                  handleOpenEnrollPopUp();
+                  setRefresh(!refresh);
+                }}>
+                Enroll my team
+              </Button>
+              <Dialog open={openEnrollPopUp} onClose={handleCloseEnrollPopUp}>
+                <DialogTitle>{"Join match"}</DialogTitle>
+                <DialogContent>
+                  <DialogContentText>
+                    Choose one of your teams to join the match
+                  </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                  <FormControl className={classes.field} fullWidth required>
+                    <InputLabel>Team</InputLabel>
+                    <Select
+                      label="Team"
+                      value={enrolledTeam}
+                      onChange={handleOnChangeEnrolledTeam}>
+                      {teams.map((team) => (
+                        <MenuItem key={team.id} value={team.id}>
+                          {team.name}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                  <Button
+                    onClick={() => {
+                      props.handleAddTeamToMatch();
+                      setRefresh(!refresh);
+                      handleCloseEnrollPopUp();
+                    }}>
+                    Add team
+                  </Button>
+                  <Button onClick={handleCloseEnrollPopUp}>Cancel</Button>
+                </DialogActions>
+              </Dialog>
+            </>
           )}
         </Box>
       </CardContent>

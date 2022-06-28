@@ -360,35 +360,37 @@ const Team = (props) => {
                 />
               ))}
             </Grid>
-            <Grid
-              container
-              direction="row"
-              justifyContent="space-around"
-              alignItems="center">
-              <Tooltip title="Schedule a match">
-                <Button
-                  style={{ color: "white", backgroundColor: "#5D3FD3" }}
-                  variant="contained">
-                  <EventAvailableIcon style={{ fill: "white" }} />
-                </Button>
-              </Tooltip>
-              <Tooltip title="Edit team">
-                <Button
-                  onClick={props.handleOnClickEditButton}
-                  style={{ color: "white", backgroundColor: "green" }}
-                  variant="contained">
-                  <EditIcon style={{ fill: "white" }} />
-                </Button>
-              </Tooltip>
-              <Tooltip title="Delete team">
-                <Button
-                  onClick={handleOnOpenPopUp}
-                  style={{ color: "white", backgroundColor: "red" }}
-                  variant="contained">
-                  <DeleteIcon style={{ fill: "white" }} />
-                </Button>
-              </Tooltip>
-            </Grid>
+            {props.currentUser == props.teamAdmin ? (
+              <Grid
+                container
+                direction="row"
+                justifyContent="space-around"
+                alignItems="center">
+                <Tooltip title="Schedule a match">
+                  <Button
+                    style={{ color: "white", backgroundColor: "#5D3FD3" }}
+                    variant="contained">
+                    <EventAvailableIcon style={{ fill: "white" }} />
+                  </Button>
+                </Tooltip>
+                <Tooltip title="Edit team">
+                  <Button
+                    onClick={props.handleOnClickEditButton}
+                    style={{ color: "white", backgroundColor: "green" }}
+                    variant="contained">
+                    <EditIcon style={{ fill: "white" }} />
+                  </Button>
+                </Tooltip>
+                <Tooltip title="Delete team">
+                  <Button
+                    onClick={handleOnOpenPopUp}
+                    style={{ color: "white", backgroundColor: "red" }}
+                    variant="contained">
+                    <DeleteIcon style={{ fill: "white" }} />
+                  </Button>
+                </Tooltip>
+              </Grid>
+            ) : null}
           </Grid>
           <Dialog open={openPopUp} onClose={handleClosePopUp}>
             <DialogTitle>{"Delete the team"}</DialogTitle>

@@ -93,6 +93,23 @@ const MatchesPage = () => {
       });
   };
 
+  const handleAddTeamToMatch = async (matchId) => {
+    await axios
+      .post(
+        "http://localhost:8080/match/addTeamToMatch",
+        {
+          matchId: matchId,
+          teamId: sessionStorage.getItem("selectedTeam"),
+        },
+        {
+          headers: { Authorization: token },
+        }
+      )
+      .then(() => {
+        setRefreshMatches(!refreshMatches);
+      });
+  };
+
   const handleOnClickButton = () => {
     history.push("/schedule");
   };
@@ -149,6 +166,9 @@ const MatchesPage = () => {
                 availableSpots={match.availableSpots}
                 handleOnDeleteClick={() => {
                   handleOnDeleteClick(match.id);
+                }}
+                handleAddTeamToMatch={() => {
+                  handleAddTeamToMatch(match.id);
                 }}
                 height={100}
                 isExplorePage={false}
