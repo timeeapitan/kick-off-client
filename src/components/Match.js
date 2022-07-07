@@ -13,9 +13,12 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
+import FormControl from "@mui/material/FormControl";
 import IconButton from "@mui/material/IconButton";
+import InputLabel from "@mui/material/InputLabel";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
+import Select from "@mui/material/Select";
 import Typography from "@mui/material/Typography";
 import { GoogleMap, Marker } from "@react-google-maps/api";
 import axios from "axios";
@@ -24,9 +27,6 @@ import { useEffect, useState } from "react";
 import Geocode from "react-geocode";
 import { useHistory } from "react-router-dom";
 import MatchDetails from "./MatchDetails";
-import FormControl from "@mui/material/FormControl";
-import InputLabel from "@mui/material/InputLabel";
-import Select from "@mui/material/Select";
 
 const useStyles = makeStyles({
   card: {
@@ -70,6 +70,18 @@ const Match = (props) => {
   const token = sessionStorage.getItem("token");
   const username = sessionStorage.getItem("username");
 
+  const restructuredDate = new Date(props.date);
+  const month = restructuredDate.toLocaleString("default", { month: "short" });
+  const day = restructuredDate.toLocaleDateString("default", {
+    day: "numeric",
+  });
+  const fromHour = props.startTime.toString().substring(0, 2);
+  const fromMinutes = props.startTime.toString().substring(3, 5);
+  const finalHour = computeHours(props.startTime, props.duration);
+  const finalInterval = finalHour + ":" + fromMinutes;
+  const weekday = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
+  const dayOfTheWeek = weekday[restructuredDate.getDay()];
+
   const [map, setMap] = React.useState(null);
   const [openPopUp, setOpenPopUp] = useState(false);
   const [openEnrollPopUp, setOpenEnrollPopUp] = useState(false);
@@ -78,10 +90,61 @@ const Match = (props) => {
   const [matchTeams, setMatchTeams] = useState([]);
   const [enrolledTeam, setEnrolledTeam] = useState("");
   const [currentUser, setCurrentUser] = useState({});
+  const [address, setAddress] = useState("");
   const [refresh, setRefresh] = useState(false);
   const [disableParticipateBtn, setDisableParticipateBtn] = useState(false);
   const [disableEnrollBtn, setDisableEnrollBtn] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
+  const [anchorElNav, setAnchorElNav] = useState(null);
+
+  const options = {
+    disableDefaultUI: true,
+    zoomControl: true,
+  };
+
+  useEffect(() => {
+    getUser();
+  }, []);
+
+  useEffect(() => {
+    getTeamsByAdmin();
+  }, [currentUser]);
+
+  useEffect(() => {
+    getAllTeamsByMatch();
+  }, [props.matchId, refresh]);
+
+  useEffect(() => {
+    const playerInMatch = players.some((player) => {
+      return player[2] == currentUser.username;
+    });
+
+    if (playerInMatch) {
+      setDisableParticipateBtn(true);
+    }
+
+    if (props.availableSpots === 0) {
+      setDisableParticipateBtn(true);
+      setDisableEnrollBtn(true);
+    }
+  }, [players]);
+
+  useEffect(() => {
+    if (props.availableSpots === 0) {
+      setDisableEnrollBtn(true);
+    }
+  }, [matchTeams]);
+
+  useEffect(() => {
+    getAllPlayers();
+  }, [props.matchId, refresh]);
+
+  useEffect(() => {
+    if (props.availableSpots === 0) {
+      setDisableEnrollBtn(true);
+      setDisableParticipateBtn(true);
+    }
+  }, []);
 
   const onLoad = React.useCallback(function callback(map) {
     const bounds = new window.google.maps.LatLngBounds(center);
@@ -96,16 +159,6 @@ const Match = (props) => {
     setMap(null);
   }, []);
 
-  const restructuredDate = new Date(props.date);
-  const month = restructuredDate.toLocaleString("default", { month: "short" });
-  const day = restructuredDate.toLocaleDateString("default", {
-    day: "numeric",
-  });
-  const fromHour = props.startTime.toString().substring(0, 2);
-  const fromMinutes = props.startTime.toString().substring(3, 5);
-  const finalHour = computeHours(props.startTime, props.duration);
-  const finalInterval = finalHour + ":" + fromMinutes;
-
   function computeHours(startTime, duration) {
     var beginningHour = startTime.toString().substring(0, 2);
     var finalHour = 0;
@@ -118,14 +171,8 @@ const Match = (props) => {
         return "0" + finalHour;
       }
     }
-
     return finalHour.toString();
   }
-
-  const weekday = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
-  const dayOfTheWeek = weekday[restructuredDate.getDay()];
-
-  const [address, setAddress] = React.useState("");
 
   Geocode.setApiKey("AIzaSyDLlvfIHgEFG0GzOLqkNpKbNleec-GVowc");
   Geocode.setLanguage("en");
@@ -139,12 +186,6 @@ const Match = (props) => {
     }
   );
 
-  const options = {
-    disableDefaultUI: true,
-    zoomControl: true,
-  };
-
-  const [anchorElNav, setAnchorElNav] = useState(null);
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
   };
@@ -189,43 +230,6 @@ const Match = (props) => {
     sessionStorage.setItem("enrolledTeam", event.target.value);
   };
 
-  useEffect(() => {
-    getUser();
-  }, []);
-
-  useEffect(() => {
-    getTeamsByAdmin();
-  }, [currentUser]);
-
-  useEffect(() => {
-    getAllTeamsByMatch();
-  }, [props.matchId, refresh]);
-
-  useEffect(() => {
-    const playerInMatch = players.some((player) => {
-      return player[2] == currentUser.username;
-    });
-
-    if (playerInMatch) {
-      setDisableParticipateBtn(true);
-    }
-
-    if (props.availableSpots == 0) {
-      setDisableParticipateBtn(true);
-      setDisableEnrollBtn(true);
-    }
-  }, [players]);
-
-  useEffect(() => {
-    if (props.availableSpots == 0) {
-      setDisableEnrollBtn(true);
-    }
-  }, [matchTeams]);
-
-  useEffect(() => {
-    getAllPlayers();
-  }, [props.matchId, refresh]);
-
   const getUser = async () => {
     await axios
       .get(
@@ -237,7 +241,6 @@ const Match = (props) => {
         }
       )
       .then((response) => {
-        console.log(response);
         setCurrentUser(response.data);
       })
       .catch((err) => {
@@ -256,7 +259,6 @@ const Match = (props) => {
       )
       .then((response) => {
         setTeams(response.data);
-        console.log(response.data);
       });
   };
 
@@ -273,8 +275,6 @@ const Match = (props) => {
       )
       .then((response) => {
         setPlayers(response.data);
-        console.log("PLAYERS");
-        console.log(response.data);
       })
       .catch((error) => {
         throw new Error(error);
@@ -294,8 +294,6 @@ const Match = (props) => {
       )
       .then((response) => {
         setMatchTeams(response.data);
-        console.log("TEAMS FROM MATCH");
-        console.log(response.data);
       })
       .catch((error) => {
         throw new Error(error);
@@ -434,12 +432,7 @@ const Match = (props) => {
         }
         title={props.title}
       />
-      <CardMedia
-      // component="img"
-      // height="100"
-      // image={image_1}
-      // alt="Missing image"
-      >
+      <CardMedia>
         {props.isLoaded && (
           <GoogleMap
             mapContainerClassName={classes.containerStyle}

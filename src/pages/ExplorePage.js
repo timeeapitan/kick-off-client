@@ -11,7 +11,7 @@ import Match from "../components/Match";
 
 const useStyles = makeStyles({
   container: {
-    justifyContent: "space-evenly",
+    justifyContent: "center",
   },
   linkContainer: {
     justifyContent: "center",
@@ -162,10 +162,13 @@ const ExplorePage = () => {
         </Grid>
         <Grid
           container
-          spacing={{ xs: 2, md: 3 }}
-          columns={{ xs: 1, xm: 2, md: 3 }}
+          spacing={{ xs: 2, md: 3, lg: 3 }}
+          columns={{ xs: 1, sm: 2, md: 3 }}
           className={classes.container}
-          style={{ marginTop: 20 }}>
+          style={{
+            marginTop: 20,
+            marginBottom: 100,
+          }}>
           {matches.map((match) => (
             <Match
               key={match.id}
@@ -193,6 +196,7 @@ const ExplorePage = () => {
               }}
               handleAddTeamToMatch={() => {
                 handleAddTeamToMatch(match.id);
+                setRefreshMatches(!refreshMatches);
               }}
             />
           ))}

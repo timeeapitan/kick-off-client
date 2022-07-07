@@ -4,17 +4,15 @@ import {
   Button,
   Card,
   CardContent,
-  createTheme,
-  CssBaseline,
   Grid,
   TextField,
   Typography,
 } from "@mui/material";
-import React, { useState } from "react";
+import Alert from "@mui/material/Alert";
+import { useState } from "react";
+import validator from "validator";
 import MainLayout from "../components/MainLayout";
 import { sendEmail } from "../service/Service";
-import validator from "validator";
-import Alert from "@mui/material/Alert";
 
 const ContactPage = () => {
   const [firstName, setFirstName] = useState("");

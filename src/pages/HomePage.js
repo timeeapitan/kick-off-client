@@ -3,15 +3,13 @@ import { makeStyles } from "@material-ui/styles";
 import CheckBoxTwoToneIcon from "@mui/icons-material/CheckBoxTwoTone";
 import SportsSoccerTwoToneIcon from "@mui/icons-material/SportsSoccerTwoTone";
 import SportsTwoToneIcon from "@mui/icons-material/SportsTwoTone";
-import { CardMedia, Grid, Typography } from "@mui/material";
+import { Grid, Typography } from "@mui/material";
 import { Box } from "@mui/system";
-import React from "react";
+import discussion from "../assets/home page/discussion.png";
+import football_player from "../assets/home page/football_player.png";
 import soccer from "../assets/logo/soccer-ball.gif";
 import MainLayout from "../components/MainLayout";
 import { MyCarousel } from "../components/MyCarousel";
-import "./HomePage.css";
-import football_player from "../assets/home page/football_player.png";
-import discussion from "../assets/home page/discussion.png";
 
 const useStyles = makeStyles({
   bold: {

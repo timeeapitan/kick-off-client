@@ -18,12 +18,11 @@ import Alert from "@mui/material/Alert";
 import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
 import Link from "@mui/material/Link";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useHistory } from "react-router-dom";
 import validator from "validator";
 import MainLayout from "../components/MainLayout";
 import { registerUser } from "../service/Service";
-import { useEffect } from "react";
 
 const useStyles = makeStyles({
   box: {
@@ -58,7 +57,13 @@ const useStyles = makeStyles({
 const RegisterPage = () => {
   const classes = useStyles();
   const formRef = useRef();
+  const history = useHistory();
 
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [show, setShow] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
+  const [severity, setSeverity] = useState("");
   const [values, setValues] = useState({
     email: "",
     password: "",
@@ -69,24 +74,14 @@ const RegisterPage = () => {
     username: "",
   });
 
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [validation, setValidation] = useState(null);
-  const [show, setShow] = useState(false);
-  const [alertMessage, setAlertMessage] = useState("");
-  const [severity, setSeverity] = useState("");
-
   useEffect(() => {
     const timeId = setTimeout(() => {
       setShow(false);
     }, 1500);
-
     return () => {
       clearTimeout(timeId);
     };
   }, [show]);
-
-  const history = useHistory();
 
   const handleChange = (prop) => (event) => {
     setValues({ ...values, [prop]: event.target.value });
@@ -124,14 +119,14 @@ const RegisterPage = () => {
     }
   };
 
-  const register = async (event) => {
+  const register = (event) => {
     event.preventDefault();
 
     formRef.current.reportValidity();
     if (values.password === values.confirmedPassword) {
       console.log(validateEmail(values.email));
       if (validateEmail(values.email)) {
-        const response = await registerUser(
+        const response = registerUser(
           firstName,
           lastName,
           values.email,

@@ -45,7 +45,7 @@ const MemberComponent = (props) => {
               <Typography>{user.username}</Typography>
               <Typography>{props.role}</Typography>
             </Grid>
-            {!props.isExplorePage && (
+            {!props.isExplorePage && props.isTeamsPage && (
               <Grid item>
                 <Button
                   disableRipple

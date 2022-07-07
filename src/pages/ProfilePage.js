@@ -3,6 +3,7 @@ import { AccountCircle } from "@material-ui/icons";
 import { makeStyles } from "@material-ui/styles";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
 import CakeIcon from "@mui/icons-material/Cake";
+import CheckIcon from "@mui/icons-material/Check";
 import EmailIcon from "@mui/icons-material/Email";
 import PersonIcon from "@mui/icons-material/Person";
 import PhoneIcon from "@mui/icons-material/Phone";
@@ -19,16 +20,15 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { styled } from "@mui/material/styles";
-import axios from "axios";
-import React, { useEffect, useState } from "react";
-import MainLayout from "../components/MainLayout";
-import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import validator from "validator";
 import Alert from "@mui/material/Alert";
-import CheckIcon from "@mui/icons-material/Check";
+import { styled } from "@mui/material/styles";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import axios from "axios";
+import { useEffect, useState } from "react";
+import validator from "validator";
+import MainLayout from "../components/MainLayout";
 
 const useStyles = makeStyles({
   container: {
@@ -50,13 +50,14 @@ const useStyles = makeStyles({
 const ProfilePage = () => {
   const classes = useStyles();
 
+  const token = sessionStorage.getItem("token");
+  const [userId, setUserId] = useState(null);
+  const URL = "http://127.0.0.1:8887/profile_pictures/";
+
   const [fullName, setFullName] = useState(sessionStorage.getItem("fullName"));
   const [uploadImage, setUploadImage] = useState(false);
   const [fakePictureSrc, setFakePictureSrc] = useState("");
   const [currentUser, setCurrentUser] = useState({});
-  const URL = "http://127.0.0.1:8887/profile_pictures/";
-  const token = sessionStorage.getItem("token");
-  const [userId, setUserId] = useState(null);
   const [username, setUsername] = useState(sessionStorage.getItem("username"));
   const [pictureId, setPictureId] = useState(null);
   const [refreshUploadImage, setRefreshUploadImage] = useState(false);
@@ -67,10 +68,8 @@ const ProfilePage = () => {
   const [existsPosition, setExistsPosition] = useState(false);
   const [existsImage, setExistsImage] = useState(true);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
-
   const [emailValidation, setEmailValidation] = useState(true);
   const [phoneValidation, setPhoneValidation] = useState(true);
-
   const [outlinedValuesFoot, setOutlinedValuesFoot] = useState({
     left: false,
     right: false,

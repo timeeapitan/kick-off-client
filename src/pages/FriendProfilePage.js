@@ -34,6 +34,8 @@ const useStyles = makeStyles({
 
 const FriendProfilePage = () => {
   const classes = useStyles();
+  const params = useParams();
+  const friendId = params.id;
 
   const token = sessionStorage.getItem("token");
   const username = sessionStorage.getItem("username");
@@ -55,9 +57,6 @@ const FriendProfilePage = () => {
   const [alertMessage, setAlertMessage] = useState("");
   const [severity, setSeverity] = useState("");
 
-  const params = useParams();
-  const friendId = params.id;
-
   useEffect(() => {
     getCurrentUser();
   }, []);
@@ -73,7 +72,7 @@ const FriendProfilePage = () => {
   useEffect(() => {
     const timeId = setTimeout(() => {
       setShow(false);
-    }, 3000);
+    }, 1000);
 
     return () => {
       clearTimeout(timeId);

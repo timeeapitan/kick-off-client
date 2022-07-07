@@ -52,6 +52,7 @@ export const registerUser = async (
       email: email,
       username: username,
       password: password,
+      tablePictureSrc: "http://127.0.0.1:8887/profile_pictures/user_4.png",
     })
     .then((res) => {
       console.log(res.data);

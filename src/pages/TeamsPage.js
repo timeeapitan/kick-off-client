@@ -14,12 +14,12 @@ import {
 import { makeStyles } from "@material-ui/styles";
 import { Box } from "@material-ui/system";
 import CircleIcon from "@mui/icons-material/Circle";
+import CircleOutlinedIcon from "@mui/icons-material/CircleOutlined";
 import axios from "axios";
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import Chat from "../components/Chat";
 import MainLayout from "../components/MainLayout";
 import Team from "../components/Team";
-import Chat from "../components/Chat";
-import CircleOutlinedIcon from "@mui/icons-material/CircleOutlined";
 
 const useStyles = makeStyles({
   buttonContainer: {
@@ -68,6 +68,7 @@ const TeamsPage = () => {
   const [currentUser, setCurrentUser] = useState({});
   const [refresh, setRefresh] = useState(false);
   const [editMode, setEditMode] = useState(false);
+  const [expanded, setExpanded] = useState(true);
 
   useEffect(() => {
     if (!rendered) {
@@ -177,6 +178,7 @@ const TeamsPage = () => {
       )
       .then((response) => {
         setRefresh(!refresh);
+        setEditMode(false);
       })
       .catch((error) => {
         throw new Error(error);
@@ -347,7 +349,7 @@ const TeamsPage = () => {
         <Grid
           container
           justifyContent="space-around"
-          style={{ display: "flex" }}
+          style={{ display: "flex", marginBottom: 100 }}
           xs={12}
           md={6}
           lg={6}>

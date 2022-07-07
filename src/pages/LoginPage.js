@@ -18,7 +18,6 @@ import Link from "@mui/material/Link";
 import { useState } from "react";
 import { useHistory } from "react-router-dom";
 import MainLayout from "../components/MainLayout";
-
 import Alert from "@mui/material/Alert";
 import Grid from "@mui/material/Grid";
 import { useEffect } from "react";
@@ -54,29 +53,27 @@ const useStyles = makeStyles({
 
 const LoginPage = () => {
   const classes = useStyles();
+  const history = useHistory();
 
+  const [hasLoginFailed, setHasLoginFailed] = useState(false);
   const [values, setValues] = useState({
     password: "",
     showPassword: false,
     username: "",
   });
 
-  const [hasLoginFailed, setHasLoginFailed] = useState(false);
-  const history = useHistory();
-
-  const handleChange = (prop) => (event) => {
-    setValues({ ...values, [prop]: event.target.value });
-  };
-
   useEffect(() => {
     const timeId = setTimeout(() => {
       setHasLoginFailed(false);
     }, 1500);
-
     return () => {
       clearTimeout(timeId);
     };
   }, [hasLoginFailed]);
+
+  const handleChange = (prop) => (event) => {
+    setValues({ ...values, [prop]: event.target.value });
+  };
 
   const handleClickShowPassword = () => {
     setValues({

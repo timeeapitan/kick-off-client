@@ -24,14 +24,13 @@ import {
   LocalizationProvider,
   TimePicker,
 } from "@mui/x-date-pickers";
-import axios, { Axios } from "axios";
+import { GoogleMap, Marker } from "@react-google-maps/api";
+import axios from "axios";
 import moment from "moment";
-import { useState, useRef, useEffect } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useHistory, useParams } from "react-router-dom";
 import FinalMap from "../google-maps-api/FinalMap";
 import MainLayout from "./MainLayout";
-import { GoogleMap, Marker } from "@react-google-maps/api";
-import { useCallback } from "react";
 
 const useStyles = makeStyles({
   field: {
@@ -71,7 +70,7 @@ const EditMatchForm = (props) => {
   const token = sessionStorage.getItem("token");
 
   const [matchTitle, setMatchTitle] = useState("");
-  const [date, setDate] = useState(new Date());
+  const [date, setDate] = useState("");
   const [finalDate, setFinalDate] = useState("");
   const [startTime, setStartTime] = useState("");
   const [finalStartTime, setFinalStartTime] = useState("");
@@ -98,6 +97,33 @@ const EditMatchForm = (props) => {
   };
 
   const formRef = useRef();
+
+  const onLoad = useCallback(function callback(map) {
+    const bounds = new window.google.maps.LatLngBounds(center);
+    map.fitBounds(bounds);
+    window.google.maps.event.addListenerOnce(map, "zoom_changed", function () {
+      map.setZoom(15);
+    });
+    setMap(map);
+  }, []);
+
+  const onUnmount = useCallback(function callback(map) {
+    setMap(null);
+  }, []);
+
+  useEffect(() => {
+    getMatchById(matchId);
+  }, [matchId]);
+
+  useEffect(() => {
+    setCenter({
+      lat: sessionStorage.getItem("locationLat"),
+      lng: sessionStorage.getItem("locationLng"),
+    });
+
+    setLocationLat(sessionStorage.getItem("locationLat"));
+    setLocationLng(sessionStorage.getItem("locationLng"));
+  }, [locationLat, locationLng]);
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -130,22 +156,8 @@ const EditMatchForm = (props) => {
     if (reason && reason == "backdropClick") {
       return;
     }
-
     setOpen(false);
   };
-
-  const onLoad = useCallback(function callback(map) {
-    const bounds = new window.google.maps.LatLngBounds(center);
-    map.fitBounds(bounds);
-    window.google.maps.event.addListenerOnce(map, "zoom_changed", function () {
-      map.setZoom(15);
-    });
-    setMap(map);
-  }, []);
-
-  const onUnmount = useCallback(function callback(map) {
-    setMap(null);
-  }, []);
 
   const convertTime = (time) => {
     let finalTime = moment(time).format("hh:mm:ss");
@@ -158,12 +170,15 @@ const EditMatchForm = (props) => {
         headers: { Authorization: token },
       })
       .then((response) => {
-        console.log("Match on edit page");
-        console.log(response);
         setSoloPlayersMode(response.data.soloPlayersMode);
         setMatchTitle(response.data.matchTitle);
         setFinalDate(response.data.date);
-        setFinalStartTime(response.data.startTime);
+        const date = new Date(
+          response.data.date + " " + response.data.startTime
+        );
+        setFinalStartTime(date);
+        console.log("the final start time is: ");
+        console.log(response.data.startTime);
         setDuration(response.data.duration);
         setLocationNotes(response.data.locationNotes);
         setNoOfTeams(response.data.noOfTeams);
@@ -173,30 +188,12 @@ const EditMatchForm = (props) => {
           lat: response.data.locationLat,
           lng: response.data.locationLng,
         });
-        console.log("this is the center");
-        console.log(center);
         setShowLocationComponent(true);
       })
       .catch((err) => {
         throw new Error(err);
       });
   };
-
-  useState(() => {
-    getMatchById(matchId);
-  }, [matchId]);
-
-  useEffect(() => {
-    setCenter({
-      lat: sessionStorage.getItem("locationLat"),
-      lng: sessionStorage.getItem("locationLng"),
-    });
-  }, [locationLat, locationLng]);
-
-  useEffect(() => {
-    setLocationLat(sessionStorage.getItem("locationLat"));
-    setLocationLng(sessionStorage.getItem("locationLng"));
-  }, []);
 
   const handleSubmitForm = (event) => {
     event.preventDefault();
@@ -210,7 +207,7 @@ const EditMatchForm = (props) => {
         {
           id: matchId,
           matchTitle: matchTitle,
-          date: date,
+          date: date != "" ? date : finalDate,
           startTime: startTime,
           duration: duration,
           locationLat: locationLat,
@@ -224,8 +221,6 @@ const EditMatchForm = (props) => {
         { headers: { Authorization: token } }
       )
       .then((res) => {
-        console.log(res);
-        console.log(res.data);
         setMatchTitle("");
         setDate("");
         setFinalDate("");
@@ -330,7 +325,7 @@ const EditMatchForm = (props) => {
                     console.log(finalStartTime);
                   }}
                   views={["hours", "minutes", "seconds"]}
-                  inputFormat="HH:mm:ss"
+                  inputFormat="hh:mm:ss"
                   renderInput={(params) => <TextField {...params} />}
                   className={classes.field}
                 />
@@ -440,12 +435,6 @@ const EditMatchForm = (props) => {
                   padding: "15px",
                 }}
                 fullWidth>
-                {/* <TextField
-                label="Enter a place"
-                variant="standard"
-                fullWidth
-                margin="dense"
-              /> */}
                 <FinalMap />
               </Box>
             </DialogContent>
@@ -473,73 +462,77 @@ const EditMatchForm = (props) => {
             required
             error={titleError}
           />
-          <Typography
-            variant="h6"
-            color="textSecondary"
-            component="h2"
-            gutterBottom
-            className={classes.field}>
-            Number of teams
-          </Typography>
-          <FormControl
-            className={classes.field}
-            fullWidth
-            required
-            error={titleError}>
-            <InputLabel>No of teams</InputLabel>
-            <Select
-              label="No of teams"
-              value={noOfTeams}
-              onChange={(event) => setNoOfTeams(event.target.value)}>
-              <MenuItem value={1}>1</MenuItem>
-              <MenuItem value={2}>2</MenuItem>
-              <MenuItem value={3}>3</MenuItem>
-              <MenuItem value={4}>4</MenuItem>
-              <MenuItem value={5}>5</MenuItem>
-              <MenuItem value={6}>6</MenuItem>
-              <MenuItem value={7}>7</MenuItem>
-              <MenuItem value={8}>8</MenuItem>
-              <MenuItem value={9}>9</MenuItem>
-              <MenuItem value={10}>10</MenuItem>
-              <MenuItem value={11}>11</MenuItem>
-              <MenuItem value={12}>12</MenuItem>
-            </Select>
-          </FormControl>
-          <Typography
-            variant="h6"
-            color="textSecondary"
-            component="h2"
-            gutterBottom
-            className={classes.field}>
-            Number of players per team
-          </Typography>
-          <FormControl
-            className={classes.field}
-            fullWidth
-            required
-            error={titleError}>
-            <InputLabel>No of players</InputLabel>
-            <Select
-              label="No of players"
-              value={noOfPlayersPerTeam}
-              onChange={(event) => {
-                setNoOfPlayersPerTeam(event.target.value);
-                console.log(noOfPlayersPerTeam);
-              }}>
-              <MenuItem value={1}>1</MenuItem>
-              <MenuItem value={2}>2</MenuItem>
-              <MenuItem value={3}>3</MenuItem>
-              <MenuItem value={4}>4</MenuItem>
-              <MenuItem value={5}>5</MenuItem>
-              <MenuItem value={6}>6</MenuItem>
-              <MenuItem value={7}>7</MenuItem>
-              <MenuItem value={8}>8</MenuItem>
-              <MenuItem value={9}>9</MenuItem>
-              <MenuItem value={10}>10</MenuItem>
-              <MenuItem value={11}>11</MenuItem>
-              <MenuItem value={12}>12</MenuItem>
-            </Select>
-          </FormControl>
+          {soloPlayersMode && (
+            <>
+              <Typography
+                variant="h6"
+                color="textSecondary"
+                component="h2"
+                gutterBottom
+                className={classes.field}>
+                Number of teams
+              </Typography>
+              <FormControl
+                className={classes.field}
+                fullWidth
+                required
+                error={titleError}>
+                <InputLabel>No of teams</InputLabel>
+                <Select
+                  label="No of teams"
+                  value={noOfTeams}
+                  onChange={(event) => setNoOfTeams(event.target.value)}>
+                  <MenuItem value={1}>1</MenuItem>
+                  <MenuItem value={2}>2</MenuItem>
+                  <MenuItem value={3}>3</MenuItem>
+                  <MenuItem value={4}>4</MenuItem>
+                  <MenuItem value={5}>5</MenuItem>
+                  <MenuItem value={6}>6</MenuItem>
+                  <MenuItem value={7}>7</MenuItem>
+                  <MenuItem value={8}>8</MenuItem>
+                  <MenuItem value={9}>9</MenuItem>
+                  <MenuItem value={10}>10</MenuItem>
+                  <MenuItem value={11}>11</MenuItem>
+                  <MenuItem value={12}>12</MenuItem>
+                </Select>
+              </FormControl>
+              <Typography
+                variant="h6"
+                color="textSecondary"
+                component="h2"
+                gutterBottom
+                className={classes.field}>
+                Number of players per team
+              </Typography>
+              <FormControl
+                className={classes.field}
+                fullWidth
+                required
+                error={titleError}>
+                <InputLabel>No of players</InputLabel>
+                <Select
+                  label="No of players"
+                  value={noOfPlayersPerTeam}
+                  onChange={(event) => {
+                    setNoOfPlayersPerTeam(event.target.value);
+                    console.log(noOfPlayersPerTeam);
+                  }}>
+                  <MenuItem value={1}>1</MenuItem>
+                  <MenuItem value={2}>2</MenuItem>
+                  <MenuItem value={3}>3</MenuItem>
+                  <MenuItem value={4}>4</MenuItem>
+                  <MenuItem value={5}>5</MenuItem>
+                  <MenuItem value={6}>6</MenuItem>
+                  <MenuItem value={7}>7</MenuItem>
+                  <MenuItem value={8}>8</MenuItem>
+                  <MenuItem value={9}>9</MenuItem>
+                  <MenuItem value={10}>10</MenuItem>
+                  <MenuItem value={11}>11</MenuItem>
+                  <MenuItem value={12}>12</MenuItem>
+                </Select>
+              </FormControl>
+            </>
+          )}
           <Typography
             variant="h6"
             color="textSecondary"
@@ -552,6 +545,8 @@ const EditMatchForm = (props) => {
             onChange={(event) => {
               setCost(event.target.value);
               console.log("LAT" + sessionStorage.getItem("locationLat"));
+              setLocationLat(sessionStorage.getItem("locationLat"));
+              setLocationLng(sessionStorage.getItem("locationLng"));
             }}
             className={classes.field}
             value={cost}

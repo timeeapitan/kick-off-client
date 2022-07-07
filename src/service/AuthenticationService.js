@@ -1,5 +1,4 @@
-import React, { Component } from "react";
-import axios from "axios";
+import { Component } from "react";
 
 class AuthenticationService extends Component {
   isUserLoggedIn() {

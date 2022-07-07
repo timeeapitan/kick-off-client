@@ -23,6 +23,7 @@ const useStyles = makeStyles({
     height: "63vh",
     flexBasis: "100%",
     borderColor: "beige",
+    backgroundColor: "blue",
   },
   headBG: {
     backgroundColor: "#e0e0e0",
@@ -48,15 +49,15 @@ const useStyles = makeStyles({
 
 const Chat = (props) => {
   const classes = useStyles();
+  const reference = useRef(null);
+  const token = sessionStorage.getItem("token");
+
   const [chat, setChat] = useState([]);
-  const [rendered, setRendered] = useState(false);
   const [chatAdmin, setChatAdmin] = useState("");
+  const [rendered, setRendered] = useState(false);
   const [message, setMessage] = useState("");
   const [team, setTeam] = useState("");
   const [refresh, setRefresh] = useState(false);
-  const reference = useRef(null);
-
-  const token = sessionStorage.getItem("token");
 
   useEffect(() => {
     if (!rendered) {
@@ -96,7 +97,6 @@ const Chat = (props) => {
       )
       .then((response) => {
         setChatAdmin(response.data);
-        console.log(chatAdmin);
       });
   };
 
@@ -109,7 +109,6 @@ const Chat = (props) => {
       })
       .then((response) => {
         setChat(response.data);
-        console.log(chat.sender);
       })
       .catch((error) => {
         throw new Error(error.message);
@@ -125,7 +124,6 @@ const Chat = (props) => {
       })
       .then((response) => {
         setTeam(response.data);
-        console.log("This is the team: " + team);
       })
       .catch((error) => {
         throw new Error(error.message);
@@ -160,7 +158,11 @@ const Chat = (props) => {
     <div>
       <Grid container>
         <Grid item>
-          <Grid container component={Paper} className={classes.chatSection}>
+          <Grid
+            container
+            component={Paper}
+            className={classes.chatSection}
+            style={{ backgroundColor: "#CCCCFF" }}>
             <Grid item xs={9} style={{ flexBasis: "100%", maxWidth: "100%" }}>
               <List className={classes.messageArea}>
                 {chat.map((chatInfo, i) => (
@@ -213,7 +215,7 @@ const Chat = (props) => {
                 container
                 style={{ padding: "20px" }}
                 alignItems="center"
-                spacing={1}>
+                spacing={2}>
                 <Grid item xs={10}>
                   <TextField
                     label="Type Something"
@@ -223,7 +225,7 @@ const Chat = (props) => {
                   />
                 </Grid>
                 <Grid item xs={1} alignItems="right">
-                  <Button onClick={onSendClick}>
+                  <Button onClick={onSendClick} size="small">
                     <Fab color="primary">
                       <SendIcon />
                     </Fab>

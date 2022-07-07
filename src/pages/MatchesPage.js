@@ -1,13 +1,13 @@
 import { makeStyles } from "@material-ui/styles";
 import { Button, Grid } from "@mui/material";
+import Link from "@mui/material/Link";
+import Typography from "@mui/material/Typography";
 import { useJsApiLoader } from "@react-google-maps/api";
 import axios from "axios";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import MainLayout from "../components/MainLayout";
 import Match from "../components/Match";
-import Link from "@mui/material/Link";
-import Typography from "@mui/material/Typography";
 import AuthenticationService from "../service/AuthenticationService.js";
 
 const useStyles = makeStyles({
@@ -16,7 +16,7 @@ const useStyles = makeStyles({
     margin: "30px",
   },
   container: {
-    justifyContent: "space-evenly",
+    justifyContent: "center",
   },
 });
 
@@ -155,6 +155,7 @@ const MatchesPage = () => {
                 date={match.date}
                 locationLat={match.locationLat}
                 locationLng={match.locationLng}
+                locationNotes={match.locationNotes}
                 noOfTeams={match.noOfTeams}
                 noOfPlayersPerTeam={match.noOfPlayersPerTeam}
                 cost={match.cost}

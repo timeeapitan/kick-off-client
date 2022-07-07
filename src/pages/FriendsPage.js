@@ -14,13 +14,13 @@ import {
 } from "@mui/material";
 import Button from "@mui/material/Button";
 import DialogContentText from "@mui/material/DialogContentText";
+import { makeStyles } from "@mui/styles";
 import { DataGrid } from "@mui/x-data-grid";
 import axios from "axios";
 import moment from "moment";
 import { useEffect, useState } from "react";
-import MainLayout from "../components/MainLayout";
-import { makeStyles } from "@mui/styles";
 import { useHistory } from "react-router-dom";
+import MainLayout from "../components/MainLayout";
 
 const useStyles = makeStyles({
   box: {
@@ -47,6 +47,13 @@ const FriendsPage = () => {
   const [openPopUp, setOpenPopUp] = useState(false);
   const history = useHistory();
 
+  const columns = [
+    { field: "firstName", headerName: "First name", width: 130 },
+    { field: "lastName", headerName: "Last name", width: 130 },
+    { field: "username", headerName: "Username", width: 130 },
+    { field: "createdDate", headerName: "Friends since", width: 150 },
+  ];
+
   useEffect(() => {
     getUserId();
     getAllUsers();
@@ -54,11 +61,9 @@ const FriendsPage = () => {
 
   useEffect(() => {
     let ignore = false;
-
     if (!ignore) {
       getFriends();
     }
-
     return () => {
       ignore = true;
     };
@@ -66,15 +71,21 @@ const FriendsPage = () => {
 
   useEffect(() => {
     let ignore = false;
-
     if (!ignore) {
       populateRows(friends);
     }
-
     return () => {
       ignore = true;
     };
   }, [friends]);
+
+  const handleOnOpenPopUp = () => {
+    setOpenPopUp(true);
+  };
+
+  const handleClosePopUp = () => {
+    setOpenPopUp(false);
+  };
 
   const getUserId = () => {
     return axios
@@ -174,14 +185,6 @@ const FriendsPage = () => {
     }
   };
 
-  const handleOnOpenPopUp = () => {
-    setOpenPopUp(true);
-  };
-
-  const handleClosePopUp = () => {
-    setOpenPopUp(false);
-  };
-
   async function populateRows(friends) {
     var rows = [];
     for (const friend of friends) {
@@ -199,14 +202,6 @@ const FriendsPage = () => {
 
     setRows(rows);
   }
-
-  const columns = [
-    // { field: "id", headerName: "id" },
-    { field: "firstName", headerName: "First name", width: 130 },
-    { field: "lastName", headerName: "Last name", width: 130 },
-    { field: "username", headerName: "Username", width: 130 },
-    { field: "createdDate", headerName: "Friends since", width: 150 },
-  ];
 
   return (
     <>

@@ -16,14 +16,18 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import logo from "../assets/logo/logo.png";
+import new_logo from "../assets/logo/new_logo.png";
 import AuthenticationService from "../service/AuthenticationService";
 import Notifications from "react-notifications-menu";
+import soccerball_notif from "../assets/logo/soccerball_notif.png";
 
 const pages = ["About", "Explore", "Matches", "Teams", "Contact us"];
 const settings = ["Profile", "Friends", "Logout"];
 const loginRegisterPages = ["Login", "Register"];
 
 const MyAppBar = () => {
+  const history = useHistory();
+
   const [anchorElNav, setAnchorElNav] = useState(null);
   const [anchorElUser, setAnchorElUser] = useState(null);
   const [isUserLoggedIn, setIsUserLoggedIn] = useState(
@@ -38,6 +42,8 @@ const MyAppBar = () => {
   const [currentUser, setCurrentUser] = useState("");
   const [username, setUsername] = useState(sessionStorage.getItem("username"));
   const [showNotification, setShowNotification] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [displayedNotifications, setDisplayedNotifications] = useState([]);
 
   useEffect(() => {
     getUser(username);
@@ -48,6 +54,16 @@ const MyAppBar = () => {
       handleGetImage();
     }
   }, [userId]);
+
+  // useEffect(() => {
+  //   const interval = setInterval(() => {
+  //     getAllNotifications();
+  //   }, 1000);
+
+  //   return () => {
+  //     clearInterval(interval);
+  //   };
+  // }, [currentUser]);
 
   const getUser = async (username) => {
     await axios
@@ -68,6 +84,51 @@ const MyAppBar = () => {
       });
   };
 
+  const getAllNotifications = async () => {
+    await axios
+      .get("http://localhost:8080/notification/getAll", {
+        headers: {
+          Authorization: token,
+        },
+      })
+      .then((response) => {
+        setNotifications(response.data);
+        populateNotifications(response.data);
+      })
+      .catch((error) => {
+        throw new Error(error);
+      });
+  };
+
+  function populateNotifications(notifications) {
+    var displayedNotif = [];
+    for (const notif of notifications) {
+      let date = new Date(notif.date);
+      let dateNow = new Date();
+      let year = date.getFullYear();
+      let month = date.getMonth();
+      let day = date.getDay();
+      let hours = notif.time.slice(0, -6);
+      if (
+        dateNow.getFullYear() - year === 0 &&
+        dateNow.getMonth() - month === 0 &&
+        dateNow.getDay() - day === 0
+      ) {
+        if (
+          hours - dateNow.getHours() >= 0 &&
+          hours - dateNow.getHours() <= 1
+        ) {
+          let newNotif = {
+            image: "http://127.0.0.1:8887/logo/soccerball_notif.png",
+            message: notif.message,
+          };
+          displayedNotif.push(newNotif);
+        }
+      }
+    }
+    setDisplayedNotifications(displayedNotif);
+  }
+
   const handleGetImage = () => {
     return axios
       .get("http://localhost:8080/user/getProfilePicture?id=" + userId, {
@@ -84,8 +145,6 @@ const MyAppBar = () => {
         throw new Error(err);
       });
   };
-
-  const history = useHistory();
 
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
@@ -144,7 +203,7 @@ const MyAppBar = () => {
             component="img"
             sx={{ height: 50, display: "flex" }}
             alt="LOGO"
-            src={logo}
+            src={new_logo}
           />
 
           <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
@@ -195,89 +254,73 @@ const MyAppBar = () => {
           </Box>
 
           {isUserLoggedIn && (
-            <Box sx={{ flexGrow: 0 }}>
-              <IconButton
-                onClick={() => setShowNotification(true)}
-                size="small"
-                style={{ color: "#fafafa", marginRight: 15 }}>
-                <Badge badgeContent={1} color="error">
-                  <NotificationsIcon />
-                </Badge>
-              </IconButton>
-              {/* {showNotification && (
+            <>
+              <div
+                style={{
+                  marginRight: 10,
+                }}>
                 <Notifications
-                  data={[
-                    {
-                      image: logo,
-                      message: "Kameshwaran S had shared a feedback with you.",
-                      detailPage: "/",
-                    },
-                    {
-                      image: logo,
-                      message: (
-                        <p>
-                          Kameshwaran S had shared a{" "}
-                          <span style={{ color: "#7ac2fa" }}>feedback</span>{" "}
-                          with you.
-                        </p>
-                      ),
-                      detailPage: "/",
-                    },
-                  ]}
+                  data={displayedNotifications}
                   header={{
-                    title: "Notifications",
-                    option: {
-                      text: "View All",
-                      onClick: () => console.log("Clicked"),
-                    },
+                    title: "Your notifications",
+                    option: {},
                   }}
-                  // classNamePrefix="okrjoy"
-                  // icon={bell}
+                  markAsRead={(displayedNotifications) => {
+                    setInterval(
+                      () => console.log(displayedNotifications),
+                      5000
+                    );
+                  }}
+                  // icon={"http://127.0.0.1:8887/logo/notification.png"}
                 />
-              )} */}
-              <Tooltip title="Open settings">
-                <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                  {hasProfilePicture && (
-                    <Avatar src={currentUser.tablePictureSrc} />
-                  )}
-                  {!hasProfilePicture && <Avatar {...stringAvatar(fullName)} />}
-                </IconButton>
-              </Tooltip>
-              <Menu
-                sx={{ mt: "45px" }}
-                id="menu-appbar"
-                anchorEl={anchorElUser}
-                anchorOrigin={{
-                  vertical: "top",
-                  horizontal: "right",
-                }}
-                keepMounted
-                transformOrigin={{
-                  vertical: "top",
-                  horizontal: "right",
-                }}
-                open={Boolean(anchorElUser)}
-                onClose={handleCloseUserMenu}>
-                {settings.map((setting) => (
-                  <MenuItem
-                    key={setting}
-                    onClick={() => {
-                      if (setting === "Profile") {
-                        history.push("/profile");
-                        handleCloseUserMenu();
-                      } else if (setting === "Friends") {
-                        history.push("/friends");
-                        handleCloseUserMenu();
-                      } else if (setting === "Logout") {
-                        handleCloseUserMenu();
-                        handleLogoutButton();
-                      }
-                    }}>
-                    <Typography textAlign="center">{setting}</Typography>
-                  </MenuItem>
-                ))}
-              </Menu>
-            </Box>
+              </div>
+              <Box sx={{ flexGrow: 0 }}>
+                <Tooltip title="Open settings">
+                  <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+                    {hasProfilePicture && (
+                      <Avatar src={currentUser.tablePictureSrc} />
+                    )}
+                    {!hasProfilePicture && (
+                      <Avatar {...stringAvatar(fullName)} />
+                    )}
+                  </IconButton>
+                </Tooltip>
+                <Menu
+                  sx={{ mt: "45px" }}
+                  id="menu-appbar"
+                  anchorEl={anchorElUser}
+                  anchorOrigin={{
+                    vertical: "top",
+                    horizontal: "right",
+                  }}
+                  keepMounted
+                  transformOrigin={{
+                    vertical: "top",
+                    horizontal: "right",
+                  }}
+                  open={Boolean(anchorElUser)}
+                  onClose={handleCloseUserMenu}>
+                  {settings.map((setting) => (
+                    <MenuItem
+                      key={setting}
+                      onClick={() => {
+                        if (setting === "Profile") {
+                          history.push("/profile");
+                          handleCloseUserMenu();
+                        } else if (setting === "Friends") {
+                          history.push("/friends");
+                          handleCloseUserMenu();
+                        } else if (setting === "Logout") {
+                          handleCloseUserMenu();
+                          handleLogoutButton();
+                        }
+                      }}>
+                      <Typography textAlign="center">{setting}</Typography>
+                    </MenuItem>
+                  ))}
+                </Menu>
+              </Box>
+            </>
           )}
 
           {!isUserLoggedIn && (

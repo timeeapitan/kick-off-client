@@ -27,12 +27,10 @@ import {
 import { GoogleMap, Marker } from "@react-google-maps/api";
 import axios from "axios";
 import moment from "moment";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useHistory } from "react-router-dom";
 import FinalMap from "../google-maps-api/FinalMap";
 import MainLayout from "./MainLayout";
-import { useCallback } from "react";
-import DialogContentText from "@mui/material/DialogContentText";
 
 const useStyles = makeStyles({
   field: {
@@ -64,7 +62,6 @@ const MatchForm = (props) => {
 
   const token = sessionStorage.getItem("token");
   const username = sessionStorage.getItem("username");
-  const [openPopUp, setOpenPopUp] = useState(false);
   const [showNext, setShowNext] = useState(false);
   const [selectedTeam, setSelectedTeam] = useState("");
   const [teams, setTeams] = useState([]);
@@ -133,20 +130,11 @@ const MatchForm = (props) => {
         }
       )
       .then((response) => {
-        console.log(response);
         setCurrentUser(response.data);
       })
       .catch((err) => {
         throw new Error(err);
       });
-  };
-
-  const handleOnOpenPopUp = () => {
-    setOpenPopUp(true);
-  };
-
-  const handleClosePopUp = () => {
-    setOpenPopUp(false);
   };
 
   const handleSubmit = (event) => {
@@ -159,6 +147,7 @@ const MatchForm = (props) => {
 
   const handleOnChangeTitle = (event) => {
     setMatchTitle(event.target.value);
+    handleSetAvailableSpots();
   };
 
   const handleOnChangeDuration = (event) => {
@@ -184,17 +173,20 @@ const MatchForm = (props) => {
   };
 
   const handleSetAvailableSpots = () => {
+    console.log("this is the solo players mode " + soloPlayersMode);
     if (soloPlayersMode) {
       setAvailableSpots(noOfTeams * noOfPlayersPerTeam);
     } else {
+      setAvailableSpots(2);
       setNoOfPlayersPerTeam(0);
       setNoOfTeams(0);
-      setAvailableSpots(2);
     }
   };
 
   const handleSubmitForm = (event) => {
     event.preventDefault();
+
+    console.log("number of available spots " + availableSpots);
 
     formRef.current.reportValidity();
     const token = sessionStorage.getItem("token");
@@ -284,7 +276,6 @@ const MatchForm = (props) => {
           justifyContent="center">
           Schedule a new match
         </Typography>
-
         <form autoComplete="on" onSubmit={handleSubmit} required ref={formRef}>
           <Typography
             variant="h6"

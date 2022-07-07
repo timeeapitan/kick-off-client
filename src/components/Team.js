@@ -54,6 +54,12 @@ const useStyles = makeStyles({
 const Team = (props) => {
   const classes = useStyles();
 
+  const columns = [
+    { field: "firstName", width: 130 },
+    { field: "lastName", width: 130 },
+    { field: "username", width: 130 },
+  ];
+
   const username = sessionStorage.getItem("username");
   const token = sessionStorage.getItem("token");
 
@@ -227,15 +233,8 @@ const Team = (props) => {
     selectedIds.map((friendId) => {
       addAFriendToTheTeam(friendId);
     });
-
     handleCloseDialog();
   };
-
-  const columns = [
-    { field: "firstName", width: 130 },
-    { field: "lastName", width: 130 },
-    { field: "username", width: 130 },
-  ];
 
   async function populateRows(friends) {
     var rows = [];
@@ -248,7 +247,6 @@ const Team = (props) => {
       };
       rows.push(array);
     }
-
     setRows(rows);
   }
 
@@ -282,10 +280,13 @@ const Team = (props) => {
                 </Button>
               </Box>
             </Grid>
+
             <Grid item>
-              <Button variant="contained" onClick={handleOpenDialog}>
-                Add members
-              </Button>
+              {props.currentUser == props.teamAdmin ? (
+                <Button variant="contained" onClick={handleOpenDialog}>
+                  Add members
+                </Button>
+              ) : null}
               <Dialog
                 open={open}
                 onClose={handleCloseDialog}

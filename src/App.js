@@ -1,10 +1,10 @@
 import { createTheme, ThemeProvider } from "@material-ui/core";
 import { CssBaseline } from "@mui/material";
-import * as React from "react";
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import Chat from "./components/Chat.js";
 import EditMatchForm from "./components/EditMatchForm.js";
 import MatchForm from "./components/MatchForm.js";
+import Notification from "./components/Notification.js";
 import ContactPage from "./pages/ContactPage";
 import ExplorePage from "./pages/ExplorePage";
 import FriendProfilePage from "./pages/FriendProfilePage.js";
@@ -15,7 +15,6 @@ import MatchesPage from "./pages/MatchesPage";
 import ProfilePage from "./pages/ProfilePage";
 import RegisterPage from "./pages/RegisterPage.js";
 import TeamsPage from "./pages/TeamsPage";
-import Notification from "./components/Notification.js";
 
 const theme = createTheme({
   palette: {

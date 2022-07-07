@@ -1,5 +1,5 @@
 import React from "react";
-import Notifications from "@mui/icons-material/Notifications";
+import Notifications from "react-notifications-menu";
 import MemberComponent from "./MemberComponent";
 
 const Notification = () => {
